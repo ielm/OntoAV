@@ -38,6 +38,7 @@ def _start(host: MalmoPython.AgentHost, mission: MalmoPython.MissionSpec):
     for retry in range(max_retries):
         try:
             host.startMission(mission, record)
+            break
         except RuntimeError as e:
             if retry == max_retries - 1:
                 print("Error starting mission:", e)

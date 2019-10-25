@@ -1,6 +1,7 @@
 from ontoagent.agent import Agent
 from ontocraft.move import MoveAMR, MoveEffector
 from ontocraft.utils.MalmoUtils import bootstrap
+
 import time
 
 
@@ -28,4 +29,4 @@ if __name__ == "__main__":
     amr.add_to_path_move_forward()
     amr.add_to_path_move_forward()
 
-    agent.output(amr, move_effector)
+    agent.output(amr, move_effector, join=True)
