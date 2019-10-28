@@ -32,6 +32,11 @@
         <Name>@SELF.AGENT.1</Name>
         <AgentStart>
             <Placement x="4.5" y="46.0" z="1.5" pitch="5" yaw="0"/>
+            <!--
+                Note:   North is Z-, South is Z+
+                        West is X-, East is X+
+                        Down is Y-, Up is Y+
+            -->
             <Inventory>
                 <InventoryItem slot="0" type="diamond_pickaxe"/>
             </Inventory>
@@ -42,13 +47,21 @@
             <ChatCommands/>
             <ObservationFromFullStats/>
             <ObservationFromGrid>
-                <Grid name="floor3x3">
-                    <min x="-1" y="-1" z="-1"/>
-                    <max x="1" y="-1" z="1"/>
+                <!--<Grid name="supervision21x21">-->
+                    <!--<min x="-10" y="-10" z="-10" />-->
+                    <!--<max x="10" y="10" z="10" />-->
+                <!--</Grid>-->
+                <Grid name="supervision11x11">
+                    <min x="-5" y="-5" z="-5" />
+                    <max x="5" y="5" z="5" />
                 </Grid>
-                <Grid name="air3x3">
-                    <min x="-1" y="1" z="-1"/>
-                    <max x="1" y="1" z="1"/>
+                <Grid name="supervision5x5">
+                    <min x="-2" y="-2" z="-2" />
+                    <max x="2" y="2" z="2" />
+                </Grid>
+                <Grid name="supervision3x3">
+                    <min x="-1" y="-1" z="-1" />
+                    <max x="1" y="1" z="1" />
                 </Grid>
             </ObservationFromGrid>
             <ObservationFromChat/>
