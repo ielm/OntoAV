@@ -3,7 +3,7 @@ from ontoagent.utils.analysis import Analyzer
 from ontocraft.move import MoveEffector
 from ontocraft.position import PositionAnalyzer, PositionExecutable, PositionSignal
 from ontocraft.utils.MalmoUtils import bootstrap
-from ontocraft.vision import SupervisionAnalyzer, SupervisionSignal
+from ontocraft.vision import LanternAnalyzer, SupervisionSignal
 from ontograph.Frame import Frame
 
 import time
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     Agent.malmo_host = host
 
     Analyzer.register_analyzer(PositionAnalyzer)
-    Analyzer.register_analyzer(SupervisionAnalyzer)
+    Analyzer.register_analyzer(LanternAnalyzer)
     agent.add_response(Frame("@ONT.MOTION-EVENT"), PositionExecutable)
 
     starting_world_state = host.getWorldState()
@@ -39,13 +39,6 @@ if __name__ == "__main__":
     signal = SupervisionSignal.build(starting_world_state)
     agent.input(signal, join=True)
     print(time.time() - start)
-
-    from ontocraft.vision import MalmoBlock
-    block = MalmoBlock(Frame("@ENV.MALMO-BLOCK.1"))
-    print(block.type())
-    print(block.absx())
-    print(block.absy())
-    print(block.absz())
 
     # # Construct a movement AMR path, and output it
     # amr = MoveAMR.build()

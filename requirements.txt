@@ -1,4 +1,5 @@
 --extra-index-url https://pypi.trulysmartagents.org/
 
-OntoAgent==3.0.0
+OntoAgent==3.0.1
 malmo==0.37.0
+numpy==1.17.3
