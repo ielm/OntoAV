@@ -248,35 +248,31 @@ class LanternAnalyzer(SupervisionAnalyzer):
             self.v3 = np.array(list(p3))
             self.normal = np.cross((self.v2 - self.v1), (self.v3 - self.v1))
 
-        def does_segment_intersect(self, start: Tuple[float, float, float], end: Tuple[float, float, float]) -> bool:
-            seg_start = np.array(list(start))
-            seg_end = np.array(list(end))
+        def does_segment_intersect(self, start: np.ndarray, end: np.ndarray) -> bool:
             plane_point = self.v1
             plane_normal = self.normal
 
-            start_side = np.dot(seg_start - plane_point, plane_normal)
-            end_side = np.dot(seg_end - plane_point, plane_normal)
+            start_side = np.dot(start - plane_point, plane_normal)
+            end_side = np.dot(end - plane_point, plane_normal)
 
             diff = start_side * end_side
 
             return diff <= 0
 
-        def point_of_intersection(self, start: Tuple[float, float, float], end: Tuple[float, float, float], epsilon=1e-6) -> Union[None, Tuple[float, float, float]]:
-            seg_start = np.array(list(start))
-            seg_end = np.array(list(end))
+        def point_of_intersection(self, start: np.ndarray, end: np.ndarray, epsilon=1e-6) -> Union[None, Tuple[float, float, float]]:
             plane_point = self.v1
             plane_normal = self.normal
 
-            u = seg_end - seg_start
+            u = end - start
             dot = np.dot(plane_normal, u)
 
             if abs(dot) > epsilon:
-                w = seg_start - plane_point
+                w = start - plane_point
                 fac = -np.dot(plane_normal, w) / dot
                 u = u * fac
-                return tuple(seg_start + u)
+                return tuple(start + u)
             else:
-                # The segment is parallel to plane
+                # The segment is parallel to the plane
                 return None
 
     def filter_blocks(self, blocks: Iterable[dict]) -> Iterable[dict]:
@@ -288,19 +284,32 @@ class LanternAnalyzer(SupervisionAnalyzer):
         rel_z = agent.anchor["ZPOS"].singleton()
 
         relative_position = (rel_x, rel_y, rel_z)
+
         eyes = (rel_x, rel_y + 0.5, rel_z)
+        eyes = np.array(list(eyes))
 
         _blocks = list(map(lambda block: LanternAnalyzer.Block(block, relative_position), blocks))
         filtered = list(filter(lambda block: not self.is_block_occluded(block, _blocks, eyes), _blocks))
 
         return map(lambda block: block.original_dict, filtered)
 
-    def is_block_occluded(self, block: Block, blocks: List[Block], eyes: Tuple[float, float, float]) -> bool:
+    def is_block_occluded(self, block: Block, blocks: List[Block], eyes: np.ndarray) -> bool:
         centers = block.surface_centers()
+        relative_x = block.original_dict["coords"][0]
+        relative_y = block.original_dict["coords"][1]
+        relative_z = block.original_dict["coords"][2]
 
         def is_face_occluded(center: Tuple[float, float, float]) -> bool:
+            center = np.array(list(center))
+
             for candidate in blocks:
                 if candidate == block:
+                    continue
+                if candidate.original_dict["coords"][0] * relative_x == -1:
+                    continue
+                if candidate.original_dict["coords"][1] * relative_y == -1:
+                    continue
+                if candidate.original_dict["coords"][2] * relative_z == -1:
                     continue
 
                 for plane in candidate.planes:
