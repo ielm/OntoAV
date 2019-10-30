@@ -1,3 +1,4 @@
+from enum import Enum
 from malmo.MalmoPython import WorldState
 from ontoagent.agent import Agent
 from ontoagent.engine.executable import HandleExecutable
@@ -24,6 +25,7 @@ class PositionSignal(Signal):
         theme["XPOS"] = observations["XPos"]
         theme["YPOS"] = observations["YPos"]
         theme["ZPOS"] = observations["ZPos"]
+        theme["YAW"] = observations["Yaw"]
 
         constituents = [root, theme]
 
@@ -39,11 +41,20 @@ class PositionSignal(Signal):
     def zpos(self) -> float:
         return self.root()["THEME"].singleton()["ZPOS"].singleton()
 
+    def yaw(self) -> float:
+        return self.root()["THEME"].singleton()["YAW"].singleton()
+
 
 class PositionXMR(XMR):
 
+    class Facing(Enum):
+        NORTH   = "NORTH"
+        SOUTH   = "SOUTH"
+        EAST    = "EAST"
+        WEST    = "WEST"
+
     @classmethod
-    def build(cls, x: float, y: float, z: float) -> 'PositionXMR':
+    def build(cls, x: float, y: float, z: float, facing: Facing) -> 'PositionXMR':
         anchor = Frame("@IO.XMR.?").add_parent("@ONT.XMR")
         space = XMR.next_available_space("XMR")
         root = space.frame("@.MOTION-EVENT.?").add_parent("@ONT.MOTION-EVENT")
@@ -59,6 +70,7 @@ class PositionXMR(XMR):
         xmr.set_x(x)
         xmr.set_y(y)
         xmr.set_z(z)
+        xmr.set_facing(facing)
 
         return xmr
 
@@ -80,6 +92,12 @@ class PositionXMR(XMR):
     def set_z(self, z: float):
         self.root()["THEME"].singleton()["Z"] = z
 
+    def facing(self) -> Facing:
+        return self.root()["THEME"].singleton()["FACING"].singleton()
+
+    def set_facing(self, facing: Facing):
+        self.root()["THEME"].singleton()["FACING"] = facing
+
 
 class PositionAnalyzer(Analyzer):
 
@@ -95,7 +113,14 @@ class PositionAnalyzer(Analyzer):
         return root ^ Frame("@ONT.MOTION-EVENT") and root["THEME"].singleton() ^ Frame("@ONT.MALMO-POSITION")
 
     def to_signal(self, input: PositionSignal) -> PositionXMR:
-        xmr = PositionXMR.build(input.xpos(), input.ypos(), input.zpos())
+        facing = {
+            0.0: PositionXMR.Facing.SOUTH,
+            90.0: PositionXMR.Facing.WEST,
+            180.0: PositionXMR.Facing.NORTH,
+            270.0: PositionXMR.Facing.EAST
+        }[input.yaw()]
+
+        xmr = PositionXMR.build(input.xpos(), input.ypos(), input.zpos(), facing)
         return xmr
 
 
@@ -108,3 +133,4 @@ class PositionExecutable(HandleExecutable):
         agent.anchor["XPOS"] = signal.x()
         agent.anchor["YPOS"] = signal.y()
         agent.anchor["ZPOS"] = signal.z()
+        agent.anchor["FACING"] = signal.facing()

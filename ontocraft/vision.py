@@ -3,10 +3,10 @@ from ontoagent.agent import Agent
 from ontoagent.engine.signal import Signal, XMR
 from ontoagent.utils.analysis import Analyzer
 from ontoagent.utils.common import AnchoredObject
+from ontocraft.position import PositionXMR
 from ontograph.Frame import Frame
 from typing import Iterable, List, Tuple, Union
 
-import itertools
 import math
 import numpy as np
 import json
@@ -147,9 +147,33 @@ class SupervisionAnalyzer(Analyzer):
         return filter(lambda block: block["type"] != "air", blocks)
 
 
-# LanternAnalyzer is a SupervisionAnalyzer that respects solid block occlusion.
-# Facing information of the agent is not respected.
-class LanternAnalyzer(SupervisionAnalyzer):
+# DirectionalVisionAnalyzer is a SupervisionAnalyzer that respects facing information of the agent.
+class DirectionalVisionAnalyzer(SupervisionAnalyzer):
+
+    def filter_blocks(self, blocks: Iterable[dict]) -> Iterable[dict]:
+        blocks = super().filter_blocks(blocks)
+
+        agent = Agent(Frame("@SELF.AGENT.1"))
+        direction = agent.anchor["FACING"].singleton()
+
+        if direction == PositionXMR.Facing.NORTH:
+            # Remove all SOUTH blocks; SOUTH blocks have a relative Z position that is is positive
+            blocks = filter(lambda block: block["coords"][2] <= 0, blocks)
+        elif direction == PositionXMR.Facing.SOUTH:
+            # Remove all NORTH blocks; NORTH blocks have a relative Z position that is is negative
+            blocks = filter(lambda block: block["coords"][2] >= 0, blocks)
+        elif direction == PositionXMR.Facing.EAST:
+            # Remove all WEST blocks; WEST blocks have a relative X position that is is negative
+            blocks = filter(lambda block: block["coords"][0] >= 0, blocks)
+        elif direction == PositionXMR.Facing.WEST:
+            # Remove all EAST blocks; EAST blocks have a relative X position that is is positive
+            blocks = filter(lambda block: block["coords"][0] <= 0, blocks)
+
+        return blocks
+
+
+# OcclusionVisionAnalyzer is a DirectionalVisionAnalyzer that respects solid block occlusion.
+class OcclusionVisionAnalyzer(DirectionalVisionAnalyzer):
 
     class Block(object):
 
@@ -173,27 +197,27 @@ class LanternAnalyzer(SupervisionAnalyzer):
 
             # Calculate the planes
             self.planes = [
-                LanternAnalyzer.Plane(
+                OcclusionVisionAnalyzer.Plane(
                     (self.min_x, self.max_y, self.max_z),
                     (self.max_x, self.max_y, self.max_z),
                     (self.max_x, self.max_y, self.min_z)),  # Top
-                LanternAnalyzer.Plane(
+                OcclusionVisionAnalyzer.Plane(
                     (self.min_x, self.min_y, self.max_z),
                     (self.max_x, self.min_y, self.max_z),
                     (self.max_x, self.min_y, self.min_z)),  # Bottom
-                LanternAnalyzer.Plane(
+                OcclusionVisionAnalyzer.Plane(
                     (self.min_x, self.max_y, self.min_z),
                     (self.max_x, self.max_y, self.min_z),
                     (self.max_x, self.min_y, self.min_z)),  # Front
-                LanternAnalyzer.Plane(
+                OcclusionVisionAnalyzer.Plane(
                     (self.min_x, self.max_y, self.max_z),
                     (self.max_x, self.max_y, self.max_z),
                     (self.max_x, self.min_y, self.max_z)),  # Back
-                LanternAnalyzer.Plane(
+                OcclusionVisionAnalyzer.Plane(
                     (self.min_x, self.max_y, self.max_z),
                     (self.min_x, self.min_y, self.max_z),
                     (self.min_x, self.min_y, self.min_z)),  # Left
-                LanternAnalyzer.Plane(
+                OcclusionVisionAnalyzer.Plane(
                     (self.max_x, self.max_y, self.max_z),
                     (self.max_x, self.min_y, self.max_z),
                     (self.max_x, self.min_y, self.min_z)),  # Right
@@ -235,7 +259,7 @@ class LanternAnalyzer(SupervisionAnalyzer):
             return False
 
         def __eq__(self, other):
-            if isinstance(other, LanternAnalyzer.Block):
+            if isinstance(other, OcclusionVisionAnalyzer.Block):
                 return self.observed_x == other.observed_x and self.observed_y == other.observed_y and self.observed_z == other.observed_z
             return super().__eq__(other)
 
@@ -288,7 +312,7 @@ class LanternAnalyzer(SupervisionAnalyzer):
         eyes = (rel_x, rel_y + 0.5, rel_z)
         eyes = np.array(list(eyes))
 
-        _blocks = list(map(lambda block: LanternAnalyzer.Block(block, relative_position), blocks))
+        _blocks = list(map(lambda block: OcclusionVisionAnalyzer.Block(block, relative_position), blocks))
         filtered = list(filter(lambda block: not self.is_block_occluded(block, _blocks, eyes), _blocks))
 
         return map(lambda block: block.original_dict, filtered)
@@ -325,8 +349,3 @@ class LanternAnalyzer(SupervisionAnalyzer):
                 return False
 
         return True
-
-
-# FlashlightAnalyzer is a LanternAnalyzer that respects facing information of the agent.
-class FlashlightAnalyzer(LanternAnalyzer):
-    pass

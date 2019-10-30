@@ -3,7 +3,7 @@ from ontoagent.utils.analysis import Analyzer
 from ontocraft.move import MoveEffector
 from ontocraft.position import PositionAnalyzer, PositionExecutable, PositionSignal
 from ontocraft.utils.MalmoUtils import bootstrap
-from ontocraft.vision import LanternAnalyzer, SupervisionSignal
+from ontocraft.vision import OcclusionVisionAnalyzer, SupervisionSignal
 from ontograph.Frame import Frame
 
 import time
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     Agent.malmo_host = host
 
     Analyzer.register_analyzer(PositionAnalyzer)
-    Analyzer.register_analyzer(LanternAnalyzer)
+    Analyzer.register_analyzer(OcclusionVisionAnalyzer)
     agent.add_response(Frame("@ONT.MOTION-EVENT"), PositionExecutable)
 
     starting_world_state = host.getWorldState()
