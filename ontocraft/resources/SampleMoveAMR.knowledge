@@ -1,0 +1,45 @@
+// Below is a sample AMR for the move effector.
+
+#SampleMoveAMR
+
+@IO.AMR.? = {
+    INSTANCE-OF         @ONT.AMR;
+    SPACE               "AMR1";
+    ROOT                @AMR1.MOTION-EVENT.1;
+    STATUS              #ontoagent.engine.signal.Signal.Status.RECEIVED;
+    TIMESTAMP           1572443093949682000;
+    HAS-CONSTITUENT     @AMR1.MOTION-EVENT.1;
+    HAS-CONSTITUENT     @AMR1.PATH.1;
+    HAS-CONSTITUENT     @AMR1.STEP.1;
+    HAS-CONSTITUENT     @AMR1.STEP.2;
+    HAS-CONSTITUENT     @AMR1.STEP.3;
+    HAS-CONSTITUENT     @AMR1.STEP.4;
+};
+
+@AMR1.MOTION-EVENT.1 = {
+    INSTANCE-OF         @ONT.MOTION-EVENT;
+    DESTINATION         @AMR1.PATH.1;
+};
+
+@AMR1.PATH.1 = {
+    HAS-STEP            @AMR1.STEP.1;
+    HAS-STEP            @AMR1.STEP.2;
+    HAS-STEP            @AMR1.STEP.3;
+    HAS-STEP            @AMR1.STEP.4;
+};
+
+@AMR1.STEP.1 = {
+    DIRECTION-OF-MOTION     "FORWARD";
+};
+
+@AMR1.STEP.2 = {
+    DIRECTION-OF-MOTION     "BACKWARD";
+};
+
+@AMR1.STEP.3 = {
+    DIRECTION-OF-MOTION     "CLOCKWISE";
+};
+
+@AMR1.STEP.4 = {
+    DIRECTION-OF-MOTION     "COUNTERCLOCKWISE";
+};

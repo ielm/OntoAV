@@ -3,7 +3,7 @@ from ontoagent.agent import Agent
 from ontoagent.engine.signal import Signal, XMR
 from ontoagent.utils.analysis import Analyzer
 from ontoagent.utils.common import AnchoredObject
-from ontocraft.position import PositionXMR
+from ontocraft.observers.position import PositionXMR
 from ontograph.Frame import Frame
 from typing import Iterable, List, Tuple, Union
 
