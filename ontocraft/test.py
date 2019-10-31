@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # Build a new agent
     agent = MalmoAgent.build(host)
 
-    # Observer location and surroundings
+    # Observe location and surroundings
     agent.observe(join=True)
 
     # Construct a movement AMR path, and output it
