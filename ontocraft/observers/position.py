@@ -8,6 +8,10 @@ from ontograph.Frame import Frame
 
 import json
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ontocraft.agent import MalmoAgent
+
 
 class PositionSignal(Signal):
 
@@ -126,11 +130,8 @@ class PositionAnalyzer(Analyzer):
 
 class PositionExecutable(HandleExecutable):
 
-    def validate(self, agent: Agent, signal: Signal) -> bool:
+    def validate(self, agent: 'MalmoAgent', signal: Signal) -> bool:
         return signal.root() ^ Frame("@ONT.MOTION-EVENT") and signal.root()["THEME"].singleton() ^ Frame("@ONT.MALMO-POSITION")
 
-    def run(self, agent: Agent, signal: PositionXMR):
-        agent.anchor["XPOS"] = signal.x()
-        agent.anchor["YPOS"] = signal.y()
-        agent.anchor["ZPOS"] = signal.z()
-        agent.anchor["FACING"] = signal.facing()
+    def run(self, agent: 'MalmoAgent', signal: PositionXMR):
+        agent.set_position(signal.x(), signal.y(), signal.z(), signal.facing())

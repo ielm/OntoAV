@@ -1,4 +1,3 @@
-from ontoagent.agent import Agent
 from ontoagent.engine.effector import Effector
 from ontoagent.engine.executable import EffectorExecutable
 from ontoagent.engine.signal import XMR
@@ -6,6 +5,10 @@ from ontograph.Frame import Frame
 from ontograph.Space import Space
 from typing import Union
 import time
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ontocraft.agent import MalmoAgent
 
 
 class MoveAMR(XMR):
@@ -49,14 +52,14 @@ class MoveEffector(Effector):
 
     @classmethod
     def build(cls, space: Union[str, Space]=None) -> 'MoveEffector':
-        type = Frame("@ONT.MOVE-EFFECTOR").add_parent("@ONT.EFFECTOR")
+        type = Frame("@ONT.MOVE-EFFECTOR")
         effector = super().build(type=type, space=space, executable=MoveEffectorExecutable)
         return MoveEffector(effector.anchor)
 
 
 class MoveEffectorExecutable(EffectorExecutable):
 
-    def run(self, agent: Agent, xmr: XMR, effector: Effector):
+    def run(self, agent: 'MalmoAgent', xmr: XMR, effector: Effector):
 
         direction_map = {
             "FORWARD": self.move_forward,
@@ -69,17 +72,17 @@ class MoveEffectorExecutable(EffectorExecutable):
         path = move["DESTINATION"].singleton()
         for step in path["HAS-STEP"]:
             direction = step["DIRECTION-OF-MOTION"].singleton()
-            direction_map[direction]()
+            direction_map[direction](agent)
             time.sleep(0.5)
 
-    def move_forward(self):
-        Agent.malmo_host.sendCommand("move 1")
+    def move_forward(self, agent: 'MalmoAgent'):
+        agent.host().sendCommand("move 1")
 
-    def move_backward(self):
-        Agent.malmo_host.sendCommand("move -1")
+    def move_backward(self, agent: 'MalmoAgent'):
+        agent.host().sendCommand("move -1")
 
-    def turn_clockwise(self):
-        Agent.malmo_host.sendCommand("turn 1")
+    def turn_clockwise(self, agent: 'MalmoAgent'):
+        agent.host().sendCommand("turn 1")
 
-    def turn_counterclockwise(self):
-        Agent.malmo_host.sendCommand("turn -1")
+    def turn_counterclockwise(self, agent: 'MalmoAgent'):
+        agent.host().sendCommand("turn -1")

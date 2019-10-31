@@ -1,8 +1,8 @@
 from malmo.MalmoPython import WorldState
-from ontoagent.agent import Agent
 from ontoagent.engine.signal import Signal, XMR
 from ontoagent.utils.analysis import Analyzer
 from ontoagent.utils.common import AnchoredObject
+from ontocraft.agent import MalmoAgent
 from ontocraft.observers.position import PositionXMR
 from ontograph.Frame import Frame
 from typing import Iterable, List, Tuple, Union
@@ -132,10 +132,11 @@ class SupervisionAnalyzer(Analyzer):
 
         blocks = self.filter_blocks(blocks)
 
-        agent = Agent(Frame("@SELF.AGENT.1"))
-        abs_x = int(agent.anchor["XPOS"].singleton())
-        abs_y = int(agent.anchor["YPOS"].singleton())
-        abs_z = int(agent.anchor["ZPOS"].singleton())
+        agent = MalmoAgent(Frame("@SELF.AGENT.1"))
+        abs_x = int(agent.x())
+        abs_y = int(agent.y())
+        abs_z = int(agent.z())
+
         blocks = map(lambda block: MalmoBlock.build(block["type"], block["coords"][0] + abs_x, block["coords"][1] + abs_y, block["coords"][2] + abs_z), blocks)
 
         blocks = list(blocks)
@@ -153,8 +154,8 @@ class DirectionalVisionAnalyzer(SupervisionAnalyzer):
     def filter_blocks(self, blocks: Iterable[dict]) -> Iterable[dict]:
         blocks = super().filter_blocks(blocks)
 
-        agent = Agent(Frame("@SELF.AGENT.1"))
-        direction = agent.anchor["FACING"].singleton()
+        agent = MalmoAgent(Frame("@SELF.AGENT.1"))
+        direction = agent.facing()
 
         if direction == PositionXMR.Facing.NORTH:
             # Remove all SOUTH blocks; SOUTH blocks have a relative Z position that is is positive
@@ -302,10 +303,10 @@ class OcclusionVisionAnalyzer(DirectionalVisionAnalyzer):
     def filter_blocks(self, blocks: Iterable[dict]) -> Iterable[dict]:
         blocks = list(super().filter_blocks(blocks))
 
-        agent = Agent(Frame("@SELF.AGENT.1"))
-        rel_x = agent.anchor["XPOS"].singleton()
-        rel_y = agent.anchor["YPOS"].singleton()
-        rel_z = agent.anchor["ZPOS"].singleton()
+        agent = MalmoAgent(Frame("@SELF.AGENT.1"))
+        rel_x = agent.x()
+        rel_y = agent.y()
+        rel_z = agent.z()
 
         relative_position = (rel_x, rel_y, rel_z)
 

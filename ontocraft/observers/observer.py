@@ -2,21 +2,26 @@ from malmo.MalmoPython import WorldState
 from ontoagent.agent import Agent
 from ontoagent.engine.executable import ProactiveExecutable
 from ontoagent.engine.signal import Signal
-from ontocraft.observers.position import PositionSignal
-from ontocraft.observers.vision import SupervisionSignal
 from ontograph.Frame import Frame
 from typing import Set, Type
 
 import json
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ontocraft.agent import MalmoAgent
 
 
 class MalmoObserver(object):
 
     MALMO_OBSERVATION_CACHE_FRAME = "@SYS.MALMO-OBSERVATION-CACHE"
 
-    def observe(self, agent: Agent, join: bool=False):
-        host = Agent.malmo_host
+    def observe(self, agent: 'MalmoAgent', join: bool=False):
+        host = agent.host()
         world_state = host.getWorldState()
+
+        from ontocraft.observers.position import PositionSignal
+        from ontocraft.observers.vision import SupervisionSignal
 
         self.observe_if_different("position", {"XPos", "YPos", "ZPos", "Yaw"}, world_state, PositionSignal, agent, join)
         self.observe_if_different("supervision", {"supervision5x5"}, world_state, SupervisionSignal, agent, join)
@@ -39,6 +44,6 @@ class MalmoObserver(object):
 
 class MalmoObserverProactiveExecutable(ProactiveExecutable):
 
-    def run(self, agent: Agent):
+    def run(self, agent: 'MalmoAgent'):
         MalmoObserver().observe(agent)
 
