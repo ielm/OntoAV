@@ -1,0 +1,49 @@
+OntoCraft is an extension of OntoAgent that uses Minecraft as a simulation environment.  Using Microsoft's Project Malmo,
+the OntoCraft agent controls a player instance in the Minecraft environment.
+
+https://www.microsoft.com/en-us/research/project/project-malmo/
+
+
+Installation:
+
+Beyond this code and the required python libraries (requirements.txt), at least one instance of Minecraft with the
+Malmo plugins must be running.  (For a multi-agent simulation, each agent requires their own running Minecraft
+instance).
+
+To install Minecraft with Malmo, follow the instructions here:
+https://github.com/Microsoft/malmo/blob/master/scripts/python-wheel/README.md
+
+- The instructions under Install using pip locally have been tested with OntoCraft; presumably the docker variant
+works as well.
+
+
+Running an Agent:
+
+1) After installation, a new instance can be started from the MalmoPlatform/Minecraft directory:
+./launchClient.sh
+
+The above should take a minute to start up, but will eventually produce a running Minecraft process at the main
+menu.
+
+2) From there, using the ontocraft.utils.MalmoUtils.bootstrap method will connect an agent to the running
+instance (and generate the world according to the mission XML).
+
+
+Running Multiple Agents:
+
+In order to run multiple agents you need to have *multiple* clients running to connect to.  This means that the above
+command to run the client should be changed to the following (e.g.):
+
+./launchClient.sh -port 10000
+./launchClient.sh -port 10001
+
+Each of the above runs in a separate terminal, and launches a separate minecraft instance.  The ports selected are
+need to be defined as part of the Malmo client pool, as in:
+
+from malmo import MalmoPython
+client_pool = MalmoPython.ClientPool()
+client_pool.add( MalmoPython.ClientInfo('127.0.0.1',10000) )
+client_pool.add( MalmoPython.ClientInfo('127.0.0.1',10001) )
+
+After which, using the ontocraft.utils.MalmoUtils.bootstrap will connect an agent to one of the clients (the next
+available one; this does not need to be specified).

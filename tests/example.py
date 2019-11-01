@@ -4,6 +4,15 @@ from ontocraft.utils.MalmoUtils import bootstrap
 
 import time
 
+"""
+To run this example script:
+
+1) Follow the installation instructions in the README
+2) Follow the Running an Agent instructions in the README
+3) Set your environment to have the following variable (located in your Malmo installation):
+   MALMO_XSD_PATH = path/to/MalmoPlatform/Schemas/
+4) Run this file
+"""
 
 if __name__ == "__main__":
 
