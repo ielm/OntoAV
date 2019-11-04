@@ -18,7 +18,7 @@ To run this example script:
 if __name__ == "__main__":
 
     # Connect to the host
-    host = bootstrap(("ontocraft.resources", "test.xml"))
+    host = bootstrap(("tests.resources", "example.xml"))
     host.sendCommand("hotbar.9 1")
     time.sleep(0.5)
 
