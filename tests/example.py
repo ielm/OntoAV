@@ -1,5 +1,6 @@
 from ontocraft.agent import MalmoAgent
 from ontocraft.effectors.move import MoveAMR
+from ontocraft.effectors.speech import SpeechTMR
 from ontocraft.utils.MalmoUtils import bootstrap
 
 import time
@@ -26,6 +27,10 @@ if __name__ == "__main__":
 
     # Observe location and surroundings
     agent.observe(join=True)
+
+    # Say something
+    tmr = SpeechTMR.build("Hello world.")
+    agent.speak(tmr, join=True)
 
     # Construct a movement AMR path, and output it
     amr = MoveAMR.build()

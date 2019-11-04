@@ -5,3 +5,4 @@
 
 
 @ONT.MOVE-EFFECTOR =            { IS-A  @ONT.EFFECTOR; };
+@ONT.SPEECH-EFFECTOR =          { IS-A  @ONT.EFFECTOR; };

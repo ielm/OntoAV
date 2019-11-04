@@ -1,7 +1,9 @@
 from malmo.MalmoPython import AgentHost
 from ontoagent.agent import Agent
+from ontoagent.engine.signal import TMR
 from ontoagent.utils.analysis import Analyzer
 from ontocraft.effectors.move import MoveAMR, MoveEffector
+from ontocraft.effectors.speech import SpeechEffector
 from ontocraft.observers.observer import MalmoObserver
 from ontocraft.observers.position import PositionExecutable, PositionXMR
 from ontograph.Frame import Frame
@@ -21,6 +23,7 @@ class MalmoAgent(Agent):
 
         # Define effectors
         agent.set_move_effector(MoveEffector.build())
+        agent.set_speech_effector(SpeechEffector.build())
 
         # Define analyzers
         from ontocraft.observers.position import PositionAnalyzer
@@ -53,6 +56,13 @@ class MalmoAgent(Agent):
     def move_effector(self) -> MoveEffector:
         return self.singletons()["MOVE-EFFECTOR"].singleton()
 
+    def set_speech_effector(self, effector: SpeechEffector):
+        self.add_effector(effector)
+        self.singletons()["SPEECH-EFFECTOR"] = effector
+
+    def speech_effector(self) -> SpeechEffector:
+        return self.singletons()["SPEECH-EFFECTOR"].singleton()
+
     def set_position(self, x: float, y: float, z: float, facing: PositionXMR.Facing):
         self.anchor["XPOS"] = x
         self.anchor["YPOS"] = y
@@ -80,4 +90,7 @@ class MalmoAgent(Agent):
 
     def move(self, amr: MoveAMR, join: bool=False):
         self.output(amr, self.move_effector(), join=join)
+
+    def speak(self, tmr: TMR, join: bool=False):
+        self.output(tmr, self.speech_effector(), join=join)
 
