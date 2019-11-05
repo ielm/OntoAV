@@ -15,7 +15,7 @@ import json
 class SupervisionSignal(Signal):
 
     @classmethod
-    def build(cls, worldstate: WorldState) -> 'SupervisionSignal':
+    def build(cls, observation: dict) -> 'SupervisionSignal':
         anchor = Frame("@IO.VMR.?").add_parent("@ONT.VMR")
         space = XMR.next_available_space("VMR")
 
@@ -24,7 +24,7 @@ class SupervisionSignal(Signal):
 
         root["THEME"] = theme
 
-        supervision = json.loads(worldstate.observations[0].text)["supervision5x5"]
+        supervision = observation["supervision5x5"]
         supervision = ";".join(supervision)
         theme["VALUE"] = supervision
 

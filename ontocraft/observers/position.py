@@ -1,6 +1,5 @@
 from enum import Enum
 from malmo.MalmoPython import WorldState
-from ontoagent.agent import Agent
 from ontoagent.engine.executable import HandleExecutable
 from ontoagent.engine.signal import Signal, XMR
 from ontoagent.utils.analysis import Analyzer
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 class PositionSignal(Signal):
 
     @classmethod
-    def build(cls, worldstate: WorldState) -> 'PositionSignal':
+    def build(cls, observation: dict) -> 'PositionSignal':
         anchor = Frame("@IO.XMR.?").add_parent("@ONT.XMR")
         space = XMR.next_available_space("XMR")
 
@@ -25,11 +24,10 @@ class PositionSignal(Signal):
 
         root["THEME"] = theme
 
-        observations = json.loads(worldstate.observations[0].text)
-        theme["XPOS"] = observations["XPos"]
-        theme["YPOS"] = observations["YPos"]
-        theme["ZPOS"] = observations["ZPos"]
-        theme["YAW"] = observations["Yaw"]
+        theme["XPOS"] = observation["XPos"]
+        theme["YPOS"] = observation["YPos"]
+        theme["ZPOS"] = observation["ZPos"]
+        theme["YAW"] = observation["Yaw"]
 
         constituents = [root, theme]
 

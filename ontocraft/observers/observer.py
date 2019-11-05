@@ -1,9 +1,9 @@
-from malmo.MalmoPython import WorldState
 from ontoagent.agent import Agent
 from ontoagent.engine.executable import ProactiveExecutable
 from ontoagent.engine.signal import Signal
+from ontoagent.utils.common import AnchoredObject
 from ontograph.Frame import Frame
-from typing import Set, Type
+from typing import List, Set, Type
 
 import json
 
@@ -12,34 +12,92 @@ if TYPE_CHECKING:
     from ontocraft.agent import MalmoAgent
 
 
-class MalmoObserver(object):
+class MalmoObserver(AnchoredObject):
+
+    @classmethod
+    def build(cls, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str) -> 'MalmoObserver':
+        anchor = Frame("@SYS.MALMO-OBSERVER.?").add_parent("@ONT.MALMO-OBSERVER")
+        anchor["TYPE"] = signal_type
+        anchor["CACHE-KEY"] = cache_key
+        anchor["FIELDS"] = list(observation_fields)
+        anchor["ENABLED"] = True
+
+        return MalmoObserver(anchor)
+
+    def type(self) -> Type[Signal]:
+        return self.anchor["TYPE"].singleton()
+
+    def key(self) -> str:
+        return self.anchor["CACHE-KEY"].singleton()
+
+    def fields(self) -> List[str]:
+        return list(self.anchor["FIELDS"])
+
+    def enable(self):
+        self.anchor["ENABLED"] = True
+
+    def disable(self):
+        self.anchor["ENABLED"] = False
+
+    def is_enabled(self) -> bool:
+        return self.anchor["ENABLED"].singleton()
+
+
+class MalmoMasterObserver(object):
 
     MALMO_OBSERVATION_CACHE_FRAME = "@SYS.MALMO-OBSERVATION-CACHE"
+    MALMO_OBSERVERS_COLLECTION_FRAME = "@SYS.MALMO-OBSERVERS-COLLECTION"
+
+    def observers(self) -> List[MalmoObserver]:
+        return list(Frame(MalmoMasterObserver.MALMO_OBSERVERS_COLLECTION_FRAME)["HAS-OBSERVER"])
+
+    def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str):
+        observers = self.observers()
+
+        for observer in observers:
+            if observer.type() == signal_type:
+                observer.enable()
+                return
+
+        observer = MalmoObserver.build(signal_type, observation_fields, cache_key)
+        Frame(MalmoMasterObserver.MALMO_OBSERVERS_COLLECTION_FRAME)["HAS-OBSERVER"] += observer
+
+    def disable_observer(self, signal_type: Type[Signal]):
+        observers = self.observers()
+
+        for observer in observers:
+            if observer.type() == signal_type:
+                observer.disable()
+                return
 
     def observe(self, agent: 'MalmoAgent', join: bool=False):
         host = agent.host()
         world_state = host.getWorldState()
 
-        from ontocraft.observers.position import PositionSignal
-        from ontocraft.observers.vision import SupervisionSignal
+        cache = Frame(MalmoMasterObserver.MALMO_OBSERVATION_CACHE_FRAME)
+        for observation in world_state.observations:
+            timestamp = int(observation.timestamp.timestamp() * 1000)
+            if "LAST-OBSERVATION" not in cache or cache["LAST-OBSERVATION"].singleton() < timestamp:
+                cache["LAST-OBSERVATION"] = timestamp
+                observation = json.loads(observation.text)
 
-        self.observe_if_different("position", {"XPos", "YPos", "ZPos", "Yaw"}, world_state, PositionSignal, agent, join)
-        self.observe_if_different("supervision", {"supervision5x5"}, world_state, SupervisionSignal, agent, join)
+                for observer in self.observers():
+                    if observer.is_enabled():
+                        self.observe_if_different(observer, observation, agent, join)
 
-    def observe_if_different(self, key: str, fields: Set[str], world_state: WorldState, signal_type: Type[Signal], agent: Agent, join: bool):
-        cache = Frame(MalmoObserver.MALMO_OBSERVATION_CACHE_FRAME)
-        observations = json.loads(world_state.observations[0].text)
+    def observe_if_different(self, observer: MalmoObserver, observation: dict, agent: Agent, join: bool):
+        cache = Frame(MalmoMasterObserver.MALMO_OBSERVATION_CACHE_FRAME)
 
         value = dict()
-        for field in fields:
-            value[field] = observations[field]
+        for field in observer.fields():
+            if field not in observation:
+                return
+            value[field] = observation[field]
 
-        if cache[key] == value:
+        if cache[observer.key()] == value:
             return
 
-        cache[key] = value
-
-        agent.input(signal_type.build(world_state), join=join)
+        agent.input(observer.type().build(value), join=join)
 
 
 class MalmoObserverProactiveExecutable(ProactiveExecutable):

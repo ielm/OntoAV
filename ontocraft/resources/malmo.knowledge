@@ -3,6 +3,7 @@
 @ONT.MALMO-BLOCK =              { IS-A  @ONT.MALMO-OBJECT; };
 @ONT.MALMO-POSITION =           { IS-A  @ONT.MALMO-OBJECT; };
 
+@ONT.MALMO-OBSERVER =           { IS-A  @ONT.MALMO-OBJECT; };
 
 @ONT.MOVE-EFFECTOR =            { IS-A  @ONT.EFFECTOR; };
 @ONT.SPEECH-EFFECTOR =          { IS-A  @ONT.EFFECTOR; };

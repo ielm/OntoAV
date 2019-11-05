@@ -1,12 +1,13 @@
 from malmo.MalmoPython import AgentHost
 from ontoagent.agent import Agent
-from ontoagent.engine.signal import TMR
+from ontoagent.engine.signal import Signal, TMR
 from ontoagent.utils.analysis import Analyzer
 from ontocraft.effectors.move import MoveAMR, MoveEffector
 from ontocraft.effectors.speech import SpeechEffector
-from ontocraft.observers.observer import MalmoObserver
+from ontocraft.observers.observer import MalmoMasterObserver
 from ontocraft.observers.position import PositionExecutable, PositionXMR
 from ontograph.Frame import Frame
+from typing import Set, Type
 
 
 class MalmoAgent(Agent):
@@ -25,12 +26,27 @@ class MalmoAgent(Agent):
         agent.set_move_effector(MoveEffector.build())
         agent.set_speech_effector(SpeechEffector.build())
 
+        # Define observers
+        from ontocraft.observers.chat import ChatSignal
+        from ontocraft.observers.position import PositionSignal
+        from ontocraft.observers.vision import SupervisionSignal
+
+        agent.enable_observer(ChatSignal, {"Chat"}, "chat")
+        agent.enable_observer(PositionSignal, {"XPos", "YPos", "ZPos", "Yaw"}, "position")
+        agent.enable_observer(SupervisionSignal, {"supervision5x5"}, "supervision")
+
         # Define analyzers
+        from ontocraft.observers.chat import ChatAnalyzer
         from ontocraft.observers.position import PositionAnalyzer
         from ontocraft.observers.vision import OcclusionVisionAnalyzer
 
+        Analyzer.register_analyzer(ChatAnalyzer)
         Analyzer.register_analyzer(PositionAnalyzer)
         Analyzer.register_analyzer(OcclusionVisionAnalyzer)
+
+        # For now, remove the default TextAnalyzer from the list of analyzers
+        from ontoagent.utils.analysis import TextAnalyzer
+        Frame("@SYS.ANALYZER-REGISTRY")["HAS-ANALYZER"] -= TextAnalyzer
 
         # Define responses
         agent.add_response(Frame("@ONT.MOTION-EVENT"), PositionExecutable)
@@ -84,7 +100,13 @@ class MalmoAgent(Agent):
     # Custom input overrides
 
     def observe(self, join: bool=False):
-        MalmoObserver().observe(self, join=join)
+        MalmoMasterObserver().observe(self, join=join)
+
+    def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str):
+        MalmoMasterObserver().enable_observer(signal_type, observation_fields, cache_key)
+
+    def disable_observer(self, signal_type: Type[Signal]):
+        MalmoMasterObserver().disable_observer(signal_type)
 
     # Custom output overrides
 
