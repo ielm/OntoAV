@@ -33,7 +33,7 @@ class MalmoAgent(Agent):
 
         agent.enable_observer(ChatSignal, {"Chat"}, "chat")
         agent.enable_observer(PositionSignal, {"XPos", "YPos", "ZPos", "Yaw"}, "position")
-        agent.enable_observer(SupervisionSignal, {"supervision5x5"}, "supervision")
+        agent.enable_observer(SupervisionSignal, {"supervision"}, "supervision")
 
         # Define analyzers
         from ontocraft.observers.chat import ChatAnalyzer
@@ -43,6 +43,10 @@ class MalmoAgent(Agent):
         Analyzer.register_analyzer(ChatAnalyzer)
         Analyzer.register_analyzer(PositionAnalyzer)
         Analyzer.register_analyzer(OcclusionVisionAnalyzer)
+
+        # ... and specify the SupervisionAnalyzer range - this must match the contents of the XML definition
+        OcclusionVisionAnalyzer.set_supervision_min(-2, -2, -2)
+        OcclusionVisionAnalyzer.set_supervision_max(2, 2, 2)
 
         # For now, remove the default TextAnalyzer from the list of analyzers
         from ontoagent.utils.analysis import TextAnalyzer

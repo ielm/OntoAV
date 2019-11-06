@@ -24,7 +24,7 @@ class SupervisionSignal(Signal):
 
         root["THEME"] = theme
 
-        supervision = observation["supervision5x5"]
+        supervision = observation["supervision"]
         supervision = ";".join(supervision)
         theme["VALUE"] = supervision
 
@@ -103,6 +103,8 @@ class MalmoVMR(XMR):
 # Facing information of the agent is not respected.
 class SupervisionAnalyzer(Analyzer):
 
+    SUPERVISION_SETTINGS_FRAME = "@SYS.SUPERVISION-SETTINGS"
+
     def __init__(self):
         super().__init__()
 
@@ -110,21 +112,56 @@ class SupervisionAnalyzer(Analyzer):
         self.root_property = "VMR-ROOT"
         self.xmr_type = MalmoVMR
 
+    @classmethod
+    def set_supervision_min(cls, x: int, y: int, z: int):
+        settings = Frame(SupervisionAnalyzer.SUPERVISION_SETTINGS_FRAME)
+        settings["XMIN"] = x
+        settings["YMIN"] = y
+        settings["ZMIN"] = z
+
+    @classmethod
+    def set_supervision_max(cls, x: int, y: int, z: int):
+        settings = Frame(SupervisionAnalyzer.SUPERVISION_SETTINGS_FRAME)
+        settings["XMAX"] = x
+        settings["YMAX"] = y
+        settings["ZMAX"] = z
+
+    @classmethod
+    def supervision_min(cls) -> Tuple[int, int, int]:
+        settings = Frame(SupervisionAnalyzer.SUPERVISION_SETTINGS_FRAME)
+        xmin = settings["XMIN"].singleton()
+        ymin = settings["YMIN"].singleton()
+        zmin = settings["ZMIN"].singleton()
+
+        return (xmin, ymin, zmin)
+
+    @classmethod
+    def supervision_max(cls) -> Tuple[int, int, int]:
+        settings = Frame(SupervisionAnalyzer.SUPERVISION_SETTINGS_FRAME)
+        xmin = settings["XMAX"].singleton()
+        ymin = settings["YMAX"].singleton()
+        zmin = settings["ZMAX"].singleton()
+
+        return (xmin, ymin, zmin)
+
     def is_appropriate(self, signal: Signal) -> bool:
         root = signal.root()
         return root ^ Frame("@ONT.VISUAL-EVENT") and root["THEME"].singleton() ^ Frame("@ONT.MALMO-OBSERVATION-GRID")
 
     def to_signal(self, input: SupervisionSignal) -> MalmoVMR:
-        size = len(input.raw_grid())
-        cube = int(math.pow(size, 1/3))
-        indexes = list(range(-int(cube/2), int(cube/2) + 1))
+        supervision_min = SupervisionAnalyzer.supervision_min()
+        supervision_max = SupervisionAnalyzer.supervision_max()
+
+        x_indexes = list(range(supervision_min[0], supervision_max[0] + 1))
+        y_indexes = list(range(supervision_min[1], supervision_max[1] + 1))
+        z_indexes = list(range(supervision_min[2], supervision_max[2] + 1))
 
         block_stream = iter(input.raw_grid())
         blocks = []
 
-        for y in indexes:
-            for z in indexes:
-                for x in indexes:
+        for y in y_indexes:
+            for z in z_indexes:
+                for x in x_indexes:
                     blocks.append({
                         "type": next(block_stream),
                         "coords": (x, y, z)
