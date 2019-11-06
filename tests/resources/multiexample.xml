@@ -42,7 +42,7 @@
             <ChatCommands/>
             <ObservationFromFullStats/>
             <ObservationFromGrid>
-                <Grid name="supervision5x5">
+                <Grid name="supervision">
                     <min x="-2" y="-2" z="-2" />
                     <max x="2" y="2" z="2" />
                 </Grid>
@@ -65,7 +65,7 @@
             <ChatCommands/>
             <ObservationFromFullStats/>
             <ObservationFromGrid>
-                <Grid name="supervision5x5">
+                <Grid name="supervision">
                     <min x="-2" y="-2" z="-2" />
                     <max x="2" y="2" z="2" />
                 </Grid>
