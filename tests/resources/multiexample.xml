@@ -63,13 +63,6 @@
             <DiscreteMovementCommands/>
             <InventoryCommands/>
             <ChatCommands/>
-            <ObservationFromFullStats/>
-            <ObservationFromGrid>
-                <Grid name="supervision">
-                    <min x="-2" y="-2" z="-2" />
-                    <max x="2" y="2" z="2" />
-                </Grid>
-            </ObservationFromGrid>
             <ObservationFromChat/>
         </AgentHandlers>
     </AgentSection>

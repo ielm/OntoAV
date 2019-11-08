@@ -1,4 +1,3 @@
-from malmo.MalmoPython import AgentHost
 from ontoagent.agent import Agent
 from ontoagent.engine.signal import Signal, TMR
 from ontoagent.utils.analysis import Analyzer
@@ -6,47 +5,56 @@ from ontocraft.effectors.move import MoveAMR, MoveEffector
 from ontocraft.effectors.speech import SpeechEffector
 from ontocraft.observers.observer import MalmoMasterObserver
 from ontocraft.observers.position import PositionExecutable, PositionXMR
+from ontocraft.utils.MalmoUtils import OntoCraftAgentHost
 from ontograph.Frame import Frame
 from typing import Set, Type
 
 
 class MalmoAgent(Agent):
 
-    CACHED_HOST: AgentHost = None
+    CACHED_HOST: OntoCraftAgentHost = None
 
     @classmethod
-    def build(cls, host: AgentHost) -> 'MalmoAgent':
+    def build(cls, host: OntoCraftAgentHost) -> 'MalmoAgent':
         agent = super().build(identity=None, agenda=None, evergreens=None, proactivity=None, ontology_loader=None)
         agent = MalmoAgent(agent.anchor)
+        agent.anchor["HAS-NAME"] = host.name()
 
         # Load additional Malmo-specific knowledge
         agent.load_knowledge("ontocraft.resources", "malmo.knowledge")
 
         # Define effectors
-        agent.set_move_effector(MoveEffector.build())
-        agent.set_speech_effector(SpeechEffector.build())
+        if host.discrete_movement():
+            agent.set_move_effector(MoveEffector.build())
 
-        # Define observers
-        from ontocraft.observers.chat import ChatSignal
-        from ontocraft.observers.position import PositionSignal
-        from ontocraft.observers.vision import SupervisionSignal
+        if host.chat()[1]:
+            agent.set_speech_effector(SpeechEffector.build())
 
-        agent.enable_observer(ChatSignal, {"Chat"}, "chat")
-        agent.enable_observer(PositionSignal, {"XPos", "YPos", "ZPos", "Yaw"}, "position")
-        agent.enable_observer(SupervisionSignal, {"supervision"}, "supervision")
+        # Define observers and analyzers
+        if host.chat()[0]:
+            from ontocraft.observers.chat import ChatSignal
+            agent.enable_observer(ChatSignal, {"Chat"}, "chat")
 
-        # Define analyzers
-        from ontocraft.observers.chat import ChatAnalyzer
-        from ontocraft.observers.position import PositionAnalyzer
-        from ontocraft.observers.vision import OcclusionVisionAnalyzer
+            from ontocraft.observers.chat import ChatAnalyzer
+            Analyzer.register_analyzer(ChatAnalyzer)
 
-        Analyzer.register_analyzer(ChatAnalyzer)
-        Analyzer.register_analyzer(PositionAnalyzer)
-        Analyzer.register_analyzer(OcclusionVisionAnalyzer)
+        if host.position():
+            from ontocraft.observers.position import PositionSignal
+            agent.enable_observer(PositionSignal, {"XPos", "YPos", "ZPos", "Yaw"}, "position")
 
-        # ... and specify the SupervisionAnalyzer range - this must match the contents of the XML definition
-        OcclusionVisionAnalyzer.set_supervision_min(-2, -2, -2)
-        OcclusionVisionAnalyzer.set_supervision_max(2, 2, 2)
+            from ontocraft.observers.position import PositionAnalyzer
+            Analyzer.register_analyzer(PositionAnalyzer)
+
+        if host.supervision() is not None:
+            from ontocraft.observers.vision import SupervisionSignal
+            agent.enable_observer(SupervisionSignal, {"supervision"}, "supervision")
+
+            from ontocraft.observers.vision import OcclusionVisionAnalyzer
+            Analyzer.register_analyzer(OcclusionVisionAnalyzer)
+
+            supervision = host.supervision()
+            OcclusionVisionAnalyzer.set_supervision_min(*list(supervision[0]))
+            OcclusionVisionAnalyzer.set_supervision_max(*list(supervision[1]))
 
         # For now, remove the default TextAnalyzer from the list of analyzers
         from ontoagent.utils.analysis import TextAnalyzer
@@ -63,10 +71,10 @@ class MalmoAgent(Agent):
     def singletons(self) -> Frame:
         return Frame("@SYS.SINGLETONS")
 
-    def set_host(self, host: AgentHost):
+    def set_host(self, host: OntoCraftAgentHost):
         MalmoAgent.CACHED_HOST = host
 
-    def host(self) -> AgentHost:
+    def host(self) -> OntoCraftAgentHost:
         return MalmoAgent.CACHED_HOST
 
     def set_move_effector(self, effector: MoveEffector):

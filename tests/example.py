@@ -24,6 +24,7 @@ if __name__ == "__main__":
 
     # Build a new agent
     agent = MalmoAgent.build(host)
+    print(agent.anchor["HAS-NAME"].singleton())
 
     # Observe location and surroundings
     agent.observe(join=True)

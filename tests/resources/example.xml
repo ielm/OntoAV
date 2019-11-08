@@ -29,7 +29,7 @@
     </ServerSection>
 
     <AgentSection mode="Survival">
-        <Name>@SELF.AGENT.1</Name>
+        <Name>Sasha</Name>
         <AgentStart>
             <Placement x="4.5" y="46.0" z="1.5" pitch="5" yaw="0"/>
             <!--
