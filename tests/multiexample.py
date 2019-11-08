@@ -42,7 +42,6 @@ if __name__ == "__main__":
     # Sasha, after the mission loads, will say "Hello world." one time.
     def bootstrap_sasha():
         agent_host = bootstrap_specific(("tests.resources", "multiexample.xml"), clients, 0)
-        agent_host.setObservationsPolicy(MalmoPython.ObservationsPolicy.KEEP_ALL_OBSERVATIONS)
 
         agent = MalmoAgent.build(agent_host)
 
@@ -59,7 +58,6 @@ if __name__ == "__main__":
     # it will be analyzed and executed with the RespondToChatExecutable above (basically just printing a log).
     def bootstrap_jake():
         agent_host = bootstrap_specific(("tests.resources", "multiexample.xml"), clients, 1)
-        agent_host.setObservationsPolicy(MalmoPython.ObservationsPolicy.KEEP_ALL_OBSERVATIONS)
 
         agent = MalmoAgent.build(agent_host)
 

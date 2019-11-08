@@ -1,3 +1,4 @@
+from malmo import MalmoPython
 from ontoagent.agent import Agent
 from ontoagent.engine.signal import Signal, TMR
 from ontoagent.utils.analysis import Analyzer
@@ -32,6 +33,8 @@ class MalmoAgent(Agent):
 
         # Define observers and analyzers
         if host.chat()[0]:
+            host.setObservationsPolicy(MalmoPython.ObservationsPolicy.KEEP_ALL_OBSERVATIONS)
+
             from ontocraft.observers.chat import ChatSignal
             agent.enable_observer(ChatSignal, {"Chat"}, "chat")
 
