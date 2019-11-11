@@ -5,6 +5,7 @@ from xml.dom import minidom
 import sys
 import time
 
+
 class OntoCraftAgentHost(MalmoPython.AgentHost):
 
     def startMission(self, mission: MalmoPython.MissionSpec, *args):
@@ -84,6 +85,7 @@ def bootstrap(mission_file: Tuple[str, str]) -> OntoCraftAgentHost:
 
     return host
 
+
 def bootstrap_specific(mission_file: Tuple[str, str], clients: List[Tuple[str, int]], index: int) -> OntoCraftAgentHost:
     mission = _config_malmo(mission_file)
     client_pool = _config_clients(clients)
@@ -93,6 +95,7 @@ def bootstrap_specific(mission_file: Tuple[str, str], clients: List[Tuple[str, i
 
     _wait_for_ok(host)
     return host
+
 
 def _make_host() -> OntoCraftAgentHost:
     host = OntoCraftAgentHost()
@@ -110,12 +113,14 @@ def _make_host() -> OntoCraftAgentHost:
 
     return host
 
+
 def _config_malmo(mission_file: Tuple[str, str]) -> MalmoPython.MissionSpec:
     xml = get_data(mission_file[0], mission_file[1])
     mission = MalmoPython.MissionSpec(xml, True)
     return mission
 
-def _config_clients(clients: List[Tuple[str, int]]=None) -> Union[None, MalmoPython.ClientPool]:
+
+def _config_clients(clients: List[Tuple[str, int]] = None) -> Union[None, MalmoPython.ClientPool]:
     if clients is None:
         return None
 
@@ -125,7 +130,8 @@ def _config_clients(clients: List[Tuple[str, int]]=None) -> Union[None, MalmoPyt
 
     return client_pool
 
-def _start(host: OntoCraftAgentHost, mission: MalmoPython.MissionSpec, client_pool: MalmoPython.ClientPool=None, role: int=0):
+
+def _start(host: OntoCraftAgentHost, mission: MalmoPython.MissionSpec, client_pool: MalmoPython.ClientPool = None, role: int = 0):
     record = MalmoPython.MissionRecordSpec()
 
     max_retries = 3
@@ -142,6 +148,7 @@ def _start(host: OntoCraftAgentHost, mission: MalmoPython.MissionSpec, client_po
                 exit(1)
             else:
                 time.sleep(2.5)
+
 
 def _wait_for_ok(host: OntoCraftAgentHost):
     print("Waiting for the mission to start", end=' ')
