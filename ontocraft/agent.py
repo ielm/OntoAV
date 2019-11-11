@@ -10,6 +10,10 @@ from ontocraft.utils.MalmoUtils import OntoCraftAgentHost
 from ontograph.Frame import Frame
 from typing import Set, Type
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ontocraft.views.environment import MalmoEnvironment
+
 
 class MalmoAgent(Agent):
 
@@ -21,6 +25,9 @@ class MalmoAgent(Agent):
         agent = MalmoAgent(agent.anchor)
         agent.anchor["HAS-NAME"] = host.name()
 
+        from ontocraft.views.environment import MalmoEnvironment
+        agent.anchor["HAS-ENVIRONMENT"] = MalmoEnvironment.build()
+
         # Load additional Malmo-specific knowledge
         agent.load_knowledge("ontocraft.resources", "malmo.knowledge")
 
@@ -31,12 +38,12 @@ class MalmoAgent(Agent):
         if host.chat()[1]:
             agent.set_speech_effector(SpeechEffector.build())
 
-        # Define observers and analyzers
+        # Define observers, analyzers, and responses
         if host.chat()[0]:
             host.setObservationsPolicy(MalmoPython.ObservationsPolicy.KEEP_ALL_OBSERVATIONS)
 
             from ontocraft.observers.chat import ChatSignal
-            agent.enable_observer(ChatSignal, {"Chat"}, "chat")
+            agent.enable_observer(ChatSignal, {"Chat"}, "chat", latest_only=False)
 
             from ontocraft.observers.chat import ChatAnalyzer
             Analyzer.register_analyzer(ChatAnalyzer)
@@ -47,6 +54,8 @@ class MalmoAgent(Agent):
 
             from ontocraft.observers.position import PositionAnalyzer
             Analyzer.register_analyzer(PositionAnalyzer)
+
+            agent.add_response(Frame("@ONT.MOTION-EVENT"), PositionExecutable)
 
         if host.supervision() is not None:
             from ontocraft.observers.vision import SupervisionSignal
@@ -59,12 +68,12 @@ class MalmoAgent(Agent):
             OcclusionVisionAnalyzer.set_supervision_min(*list(supervision[0]))
             OcclusionVisionAnalyzer.set_supervision_max(*list(supervision[1]))
 
+            from ontocraft.observers.vision import SupervisionExecutable
+            agent.add_response(Frame("@ONT.VISUAL-EVENT"), SupervisionExecutable)
+
         # For now, remove the default TextAnalyzer from the list of analyzers
         from ontoagent.utils.analysis import TextAnalyzer
         Frame("@SYS.ANALYZER-REGISTRY")["HAS-ANALYZER"] -= TextAnalyzer
-
-        # Define responses
-        agent.add_response(Frame("@ONT.MOTION-EVENT"), PositionExecutable)
 
         # Attach Malmo host
         agent.set_host(host)
@@ -112,13 +121,16 @@ class MalmoAgent(Agent):
     def facing(self) -> PositionXMR.Facing:
         return self.anchor["FACING"].singleton()
 
+    def environment(self) -> 'MalmoEnvironment':
+        return self.anchor["HAS-ENVIRONMENT"].singleton()
+
     # Custom input overrides
 
     def observe(self, join: bool=False):
         MalmoMasterObserver().observe(self, join=join)
 
-    def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str):
-        MalmoMasterObserver().enable_observer(signal_type, observation_fields, cache_key)
+    def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str, latest_only: bool=True):
+        MalmoMasterObserver().enable_observer(signal_type, observation_fields, cache_key, latest_only=latest_only)
 
     def disable_observer(self, signal_type: Type[Signal]):
         MalmoMasterObserver().disable_observer(signal_type)

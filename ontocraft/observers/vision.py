@@ -1,4 +1,4 @@
-from malmo.MalmoPython import WorldState
+from ontoagent.engine.executable import HandleExecutable
 from ontoagent.engine.signal import Signal, XMR
 from ontoagent.utils.analysis import Analyzer
 from ontoagent.utils.common import AnchoredObject
@@ -9,7 +9,6 @@ from typing import Iterable, List, Tuple, Union
 
 import math
 import numpy as np
-import json
 
 
 class SupervisionSignal(Signal):
@@ -41,7 +40,7 @@ class MalmoBlock(AnchoredObject):
 
     @classmethod
     def build(cls, type: str, absx: int, absy: int, absz: int) -> 'MalmoBlock':
-        frame = Frame("@ENV.MALMO-BLOCK.?").add_parent("@ONT.MALMO-BLOCK")
+        frame = Frame("@???.MALMO-BLOCK.?").add_parent("@ONT.MALMO-BLOCK")
         b = MalmoBlock(frame)
         b.set_type(type)
         b.set_absx(absx)
@@ -92,7 +91,7 @@ class MalmoVMR(XMR):
         return v
 
     def blocks(self) -> List[MalmoBlock]:
-        return self.root()["THEME"]
+        return list(self.root()["THEME"])
 
     def set_blocks(self, blocks: List[MalmoBlock]):
         self.root()["THEME"] = blocks
@@ -175,9 +174,7 @@ class SupervisionAnalyzer(Analyzer):
         abs_z = int(agent.z())
 
         blocks = map(lambda block: MalmoBlock.build(block["type"], block["coords"][0] + abs_x, block["coords"][1] + abs_y, block["coords"][2] + abs_z), blocks)
-
         blocks = list(blocks)
-        print("Writing %d blocks" % len(blocks))
 
         return MalmoVMR.build(blocks)
 
@@ -387,3 +384,18 @@ class OcclusionVisionAnalyzer(DirectionalVisionAnalyzer):
                 return False
 
         return True
+
+
+class SupervisionExecutable(HandleExecutable):
+
+    def validate(self, agent: 'MalmoAgent', signal: Signal) -> bool:
+        theme = list(signal.root()["THEME"])
+        if len(theme) == 0:
+            return False
+
+        theme_example = theme[0]
+
+        return signal.root() ^ Frame("@ONT.VISUAL-EVENT") and isinstance(theme_example, MalmoBlock)
+
+    def run(self, agent: 'MalmoAgent', signal: MalmoVMR):
+        agent.environment().update(agent, signal)

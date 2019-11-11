@@ -45,3 +45,10 @@ if __name__ == "__main__":
     amr.add_to_path_move_forward()
 
     agent.move(amr, join=True)
+
+    # Observe the environment again
+    agent.observe(join=True)
+
+    # The environment should have a record of the stone_button
+    # It is directly in front (relx = 0, relz = 1), and is at eye-level (rely = 1)
+    print(agent.environment().relative_block(agent, 0, 1, 1).type())

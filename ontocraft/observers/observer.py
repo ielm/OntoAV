@@ -15,12 +15,13 @@ if TYPE_CHECKING:
 class MalmoObserver(AnchoredObject):
 
     @classmethod
-    def build(cls, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str) -> 'MalmoObserver':
+    def build(cls, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str, latest_only: bool) -> 'MalmoObserver':
         anchor = Frame("@SYS.MALMO-OBSERVER.?").add_parent("@ONT.MALMO-OBSERVER")
         anchor["TYPE"] = signal_type
         anchor["CACHE-KEY"] = cache_key
         anchor["FIELDS"] = list(observation_fields)
         anchor["ENABLED"] = True
+        anchor["LATEST-ONLY"] = latest_only
 
         return MalmoObserver(anchor)
 
@@ -42,6 +43,9 @@ class MalmoObserver(AnchoredObject):
     def is_enabled(self) -> bool:
         return self.anchor["ENABLED"].singleton()
 
+    def is_latest_only(self) -> bool:
+        return self.anchor["LATEST-ONLY"].singleton()
+
 
 class MalmoMasterObserver(object):
 
@@ -51,7 +55,7 @@ class MalmoMasterObserver(object):
     def observers(self) -> List[MalmoObserver]:
         return list(Frame(MalmoMasterObserver.MALMO_OBSERVERS_COLLECTION_FRAME)["HAS-OBSERVER"])
 
-    def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str):
+    def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str, latest_only: bool=True):
         observers = self.observers()
 
         for observer in observers:
@@ -59,7 +63,7 @@ class MalmoMasterObserver(object):
                 observer.enable()
                 return
 
-        observer = MalmoObserver.build(signal_type, observation_fields, cache_key)
+        observer = MalmoObserver.build(signal_type, observation_fields, cache_key, latest_only)
         Frame(MalmoMasterObserver.MALMO_OBSERVERS_COLLECTION_FRAME)["HAS-OBSERVER"] += observer
 
     def disable_observer(self, signal_type: Type[Signal]):
@@ -75,14 +79,16 @@ class MalmoMasterObserver(object):
         world_state = host.getWorldState()
 
         cache = Frame(MalmoMasterObserver.MALMO_OBSERVATION_CACHE_FRAME)
-        for observation in world_state.observations:
+        observations = list(world_state.observations)
+
+        for i, observation in enumerate(observations):
             timestamp = int(observation.timestamp.timestamp() * 1000)
             if "LAST-OBSERVATION" not in cache or cache["LAST-OBSERVATION"].singleton() < timestamp:
                 cache["LAST-OBSERVATION"] = timestamp
                 observation = json.loads(observation.text)
 
                 for observer in self.observers():
-                    if observer.is_enabled():
+                    if observer.is_enabled() and (not observer.is_latest_only() or i == len(observations) -1):
                         self.observe_if_different(observer, observation, agent, join)
 
     def observe_if_different(self, observer: MalmoObserver, observation: dict, agent: Agent, join: bool):
