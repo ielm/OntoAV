@@ -31,7 +31,7 @@ class OntoAV:
         self.agent.speak(tmr, join=True)
 
     @staticmethod
-    def move_forward_x(amr: MoveAMR = None, distance: int = 1):
+    def move_forward(amr: MoveAMR = None, distance: int = 1):
         if amr is None:
             amr = MoveAMR.build()
         for i in range(distance):
@@ -39,7 +39,7 @@ class OntoAV:
         return amr
 
     @staticmethod
-    def move_backward_x(amr: MoveAMR = None, distance: int = 1):
+    def move_backward(amr: MoveAMR = None, distance: int = 1):
         if amr is None:
             amr = MoveAMR.build()
         for i in range(distance):
@@ -47,7 +47,7 @@ class OntoAV:
         return amr
 
     @staticmethod
-    def turn_cw_x(amr: MoveAMR = None, times: int = 1):
+    def turn_cw(amr: MoveAMR = None, times: int = 1):
         if amr is None:
             amr = MoveAMR.build()
         for i in range(times):
@@ -55,45 +55,45 @@ class OntoAV:
         return amr
 
     @staticmethod
-    def turn_ccw_x(amr: MoveAMR = None, times: int = 1):
+    def turn_ccw(amr: MoveAMR = None, times: int = 1):
         if amr is None:
             amr = MoveAMR.build()
         for i in range(times):
             amr.add_to_path_turn_counterclockwise()
         return amr
 
-    def move(self, f: int=0, b: int=0, cw: int=0, ccw: int=0, join=True):
-        # TODO - This is an abhorrent way to do this, I'll get around to doing this correctly soon
-
+    def _move(self, mvmt: list, join=True):
         amrs = []
 
-        if f is not 0:
-            amrs.append(self.move_forward_x(distance=f))
-        if b is not 0:
-            amrs.append(self.move_backward_x(distance=b))
-        if cw is not 0:
-            amrs.append(self.turn_cw_x(times=cw))
-        if ccw is not 0:
-            amrs.append(self.turn_ccw_x(times=ccw))
-
+        if mvmt[0] == "f":
+            amrs.append(self.move_forward(distance=mvmt[1]))
+        if mvmt[0] == "b":
+            amrs.append(self.move_backward(distance=mvmt[1]))
+        if mvmt[0] == "cw":
+            amrs.append(self.turn_cw(times=mvmt[1]))
+        if mvmt[0] == "ccw":
+            amrs.append(self.turn_ccw(times=mvmt[1]))
         for amr in amrs:
             self.agent.move(amr, join)
-            # self.observe(join=True)
+            self.observe(join)
+
+    def move(self, input: str):
+        input = [item.strip() for item in input.split(',')]
+        for mvmt in input:
+            mvmt = list(map(lambda x: int(x) if x.isdigit() else x, mvmt.split("x")))
+            self._move(mvmt)
 
     def observe(self, join=True):
         self.agent.observe(join)
 
+    def environment(self):
+        return self.agent.environment()
+
 
 if __name__ == '__main__':
     agent = OntoAV()
-    # agent.move(cw=1)
-    # host = bootstrap(("resources", "world.xml"))
-    # host.sendCommand("hotbar.9 1")
-    # time.sleep(0.5)
-    #
-    # # Build a new agent
-    # agent = MalmoAgent.build(host)
-    # print(agent.anchor["HAS-NAME"].singleton())
-    #
-    # # Observe location and surroundings
-    # agent.observe(join=True)
+
+    planned_path = "cwx1, fx1, ccwx1, fx5"
+    agent.move(planned_path)
+
+    print(agent.environment().relative_block(agent.agent, 0, 1, 1).type())
