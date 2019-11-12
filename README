@@ -3,7 +3,7 @@
 OntoCraft is an extension of OntoAgent that uses Minecraft as a simulation environment.  Using Microsoft's Project Malmo,
 the OntoCraft agent controls a player instance in the Minecraft environment.
 
-[https://www.microsoft.com/en-us/research/project/project-malmo/]()
+[https://www.microsoft.com/en-us/research/project/project-malmo/](https://www.microsoft.com/en-us/research/project/project-malmo/)
 
 
 ## Installation
@@ -12,8 +12,7 @@ Beyond this code and the required python libraries (requirements.txt), at least 
 Malmo plugins must be running.  (For a multi-agent simulation, each agent requires their own running Minecraft
 instance).
 
-To install Minecraft with Malmo, follow the instructions here:
-[https://github.com/Microsoft/malmo/blob/master/scripts/python-wheel/README.md]()
+To install Minecraft with Malmo, follow the instructions [here](https://github.com/Microsoft/malmo/blob/master/scripts/python-wheel/README.md):
 
 > The instructions under Install using pip locally have been tested with OntoCraft; presumably the docker variant
 works as well.
@@ -25,7 +24,9 @@ works as well.
 `./launchClient.sh`.
 This should take a minute to start up, but will eventually produce a running Minecraft process at the main
 menu.
-2. From there, using the `ontocraft.utils.MalmoUtils.bootstrap` method will connect an agent to the running
+2. Start and continue running the mongodb used by the OntoAgent's ontology. Only the
+database needs to be up and running.
+3. From there, using the `ontocraft.utils.MalmoUtils.bootstrap` method will connect an agent to the running
 instance (and generate the world according to the mission XML).
 
 
