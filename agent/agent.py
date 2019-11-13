@@ -59,7 +59,7 @@ class OntoAV(MalmoAgent):
             amr.add_to_path_turn_counterclockwise()
         return amr
 
-    def _move(self, mvmt: list, join=True):
+    def _move(self, mvmt: list, join=True, debug=False):
         amrs = []
 
         if mvmt[0] == "f":
@@ -71,14 +71,18 @@ class OntoAV(MalmoAgent):
         if mvmt[0] == "ccw":
             amrs.append(self.turn_ccw(times=mvmt[1]))
         for amr in amrs:
+            if debug:
+                print()
+                print(amr.root().debug())
+                print(list(map(lambda x: x.debug(), amr.constituents())))
             self.move(amr, join)
             self.observe(join)
 
-    def movepath(self, input: str):
+    def movepath(self, input: str, debug=False):
         input = [item.strip() for item in input.split(',')]
         for mvmt in input:
             mvmt = list(map(lambda x: int(x) if x.isdigit() else x, mvmt.split("x")))
-            self._move(mvmt)
+            self._move(mvmt, debug=debug)
 
 
 if __name__ == '__main__':
@@ -88,7 +92,7 @@ if __name__ == '__main__':
 
     agent = OntoAV.build(host)
 
-    planned_path = "cwx1, fx1, ccwx1, fx5"
+    planned_path = "cwx1, fx1, ccwx1, fx5, cwx1"
     agent.movepath(planned_path)
 
     print(agent.environment().relative_block(agent, 0, 1, 1).type())
