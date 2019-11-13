@@ -19,4 +19,4 @@ if __name__ == '__main__':
 	# Say something
 	agent.speaksentence("Hello world.")
 
-	agent.movepath("fx18, cwx1, fx12")
+agent.movepath("fx18, cwx1, fx12, cwx1")
