@@ -1,0 +1,7 @@
+TODO:
+    [] - Build test environment for agent
+    [] - Instantiate agent in world
+    [] - Build AMR for agent to move x steps forward
+    [] - Build AMR for agent to turn x times cw & ccw
+    [] - Implement route planning algorithm
+    [] -
