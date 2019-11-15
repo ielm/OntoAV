@@ -7,15 +7,15 @@ from ontocraft.agent import MalmoAgent
 from ontocraft.effectors.move import MoveAMR
 from ontocraft.effectors.speech import SpeechTMR
 from ontocraft.utils.MalmoUtils import OntoCraftAgentHost, bootstrap
-
+from clagent.handle import ChatHandleExecutable
 import time
 
 
-class OntoAV(MalmoAgent):
+class CLAgent(MalmoAgent):
     @classmethod
-    def build(cls, host: OntoCraftAgentHost) -> 'OntoAV':
+    def build(cls, host: OntoCraftAgentHost) -> 'CLAgent':
         agent = super().build(host)
-        agent = OntoAV(agent.anchor)
+        agent = CLAgent(agent.anchor)
         return agent
 
         # TODO:
@@ -90,7 +90,8 @@ if __name__ == '__main__':
     host.sendCommand("hotbar.9 1")
     time.sleep(0.5)
 
-    agent = OntoAV.build(host)
+    agent = CLAgent.build(host)
+    agent.add_response("@ONT.SPEECH-ACT", ChatHandleExecutable)
 
     planned_path = "cwx1, fx1, ccwx1, fx5, cwx1"
     agent.movepath(planned_path)

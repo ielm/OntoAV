@@ -20,7 +20,7 @@
     <AgentSection mode="Survival">
         <Name>Sasha</Name>
         <AgentStart>
-            <Placement x="-542" y="4" z="376" pitch="5" yaw="0"/>
+            <Placement x="-542.5" y="4" z="376.5" pitch="5" yaw="0"/>
             <!--
                 Note:   North is Z-, South is Z+
                         West is X-, East is X+
