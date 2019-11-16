@@ -13,14 +13,14 @@
         </ServerInitialConditions>
         <ServerHandlers>
             <!-- change path to abs path of /OntoAV/worldtest/resources/25world-->
-            <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/tests/resources/25world" forceReset="true" />
+            <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/tests/resources/new25world" forceReset="true" />
         </ServerHandlers>
     </ServerSection>
 
     <AgentSection mode="Survival">
         <Name>Sasha</Name>
         <AgentStart>
-            <Placement x="-542.5" y="4" z="376.5" pitch="5" yaw="0"/>
+            <Placement x="-541.5" y="4" z="370.5" pitch="5" yaw="0"/>
             <!--
                 Note:   North is Z-, South is Z+
                         West is X-, East is X+
@@ -49,7 +49,7 @@
     <AgentSection mode="Survival">
         <Name>Jake</Name>
         <AgentStart>
-            <Placement x="-540.5" y="4" z="376.5" pitch="5" yaw="0"/>
+            <Placement x="-541.5" y="4" z="376.5" pitch="5" yaw="0"/>
             <!--
                 Note:   North is Z-, South is Z+
                         West is X-, East is X+
