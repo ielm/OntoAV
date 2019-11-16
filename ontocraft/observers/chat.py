@@ -71,6 +71,9 @@ class ChatTMR(XMR):
     def agent(self) -> Frame:
         return self.root()["AGENT"].singleton()
 
+    def debug(self):
+        return [self.root().id, self.root().debug(), list(map(lambda c: [c.id, c.debug()], self.constituents()))]
+
 
 class ChatAnalyzer(Analyzer):
 
