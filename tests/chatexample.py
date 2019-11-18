@@ -17,31 +17,34 @@ if __name__ == '__main__':
         ("localhost", 10001),
     ]
 
-    def bootstrap_sasha():
+    def bootstrap_user():
         agent_host = bootstrap_specific(("resources", "25world.xml"), clients, 0)
 
-        agent = CLAgent.build(agent_host)
+        user = CLAgent.build(agent_host)
 
         action = False
-        while agent.host().getWorldState().is_mission_running:
-            time.sleep(3)
+        while user.host().getWorldState().is_mission_running:
+            time.sleep(2)
 
             if not action:
                 tmr = SpeechTMR.build("Hello world.")
-                agent.speak(tmr, join=True)
+                user.speak(tmr, join=True)
                 action = True
 
-    # Jake, after the mission loads, will observe every 2 seconds.  When he finds a chat signal,
-    # it will be analyzed and execute a chat handler which checks for movement commands. On
-    # a movement command, Jake will execute the movement command.
-    def bootstrap_jake():
+    def bootstrap_agent():
         agent_host = bootstrap_specific(("resources", "25world.xml"), clients, 1)
 
         agent = CLAgent.build(agent_host)
 
         # Jake needs to know who Sasha is, so the input signal can be attributed to the speaker correctly.
-        sasha = Frame("@ENV.AGENT.?").add_parent("@ONT.AGENT")
-        sasha["HAS-NAME"] = "Sasha"
+        user = Frame("@ENV.AGENT.?").add_parent("@ONT.AGENT")
+        user["HAS-NAME"] = "USER"
+
+        # Disable all of the other signal observations for optimization of this example.
+        from ontocraft.observers.position import PositionSignal
+        from ontocraft.observers.vision import SupervisionSignal
+        agent.disable_observer(PositionSignal)
+        agent.disable_observer(SupervisionSignal)
 
         # Make sure Jake knows how to respond to an analyzed speech act.
         agent.add_response(Frame("@ONT.SPEECH-ACT"), ChatHandleExecutable)
@@ -51,11 +54,12 @@ if __name__ == '__main__':
 
             agent.observe(join=True)
 
+
     # Make a process for bootstrapping and running each agent; they do not need to be joined or timed otherwise.
     from multiprocessing import Process
 
-    p1 = Process(target=bootstrap_sasha)
+    p1 = Process(target=bootstrap_user)
     p1.start()
 
-    p2 = Process(target=bootstrap_jake)
+    p2 = Process(target=bootstrap_agent)
     p2.start()
