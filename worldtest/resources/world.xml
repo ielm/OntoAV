@@ -14,7 +14,7 @@
         <ServerHandlers>
             <!-- change path to abs path of /OntoAV/worldtest/resources/25world-->
             <!-- <FileWorldGenerator src="/Users/XiaoyiLiu/Dropbox/96_LEIA/CL/OntoAV/worldtest/resources/25world" forceReset="true" /> -->
-            <FileWorldGenerator src="/home/hayes/ontocraft/worldtest/resources/world_with_obstacle" forceReset="true" />
+            <FileWorldGenerator src="/home/hayes/ontocraft/worldtest/resources/prettyworld" forceReset="true" />
         </ServerHandlers>
     </ServerSection>
 
