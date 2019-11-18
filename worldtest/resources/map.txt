@@ -4,7 +4,7 @@ R     R     R     R     R
 R     R     R     R     R
 R     R     R     R     R
 R     R     R G   R     R
-RRRRRRRRRRRRRRRRXXRRRRRRR
+RRRRRRRRRRRRRRRRRRRRRRRRR
 R     R     R     R     R
 R     R     R     R     R
 R     R     R     R     R
