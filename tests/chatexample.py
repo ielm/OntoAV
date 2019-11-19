@@ -18,7 +18,7 @@ if __name__ == '__main__':
     ]
 
     def bootstrap_user():
-        agent_host = bootstrap_specific(("resources", "25world.xml"), clients, 0)
+        agent_host = bootstrap_specific(("worldtest.resources", "multiworld.xml"), clients, 0)
 
         agent = CLAgent.build(agent_host)
 
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # it will be analyzed and execute a chat handler which checks for movement commands. On
     # a movement command, the agent will execute the movement command.
     def bootstrap_agent():
-        agent_host = bootstrap_specific(("resources", "25world.xml"), clients, 1)
+        agent_host = bootstrap_specific(("worldtest.resources", "multiworld.xml"), clients, 1)
 
         agent = CLAgent.build(agent_host)
 
