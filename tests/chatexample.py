@@ -20,15 +20,15 @@ if __name__ == '__main__':
     def bootstrap_user():
         agent_host = bootstrap_specific(("worldtest.resources", "multiworld.xml"), clients, 0)
 
-        agent = CLAgent.build(agent_host)
+        user = CLAgent.build(agent_host)
 
         action = False
-        while agent.host().getWorldState().is_mission_running:
+        while user.host().getWorldState().is_mission_running:
             time.sleep(2)
 
             if not action:
                 tmr = SpeechTMR.build("My name is Ozymandias, king of agents: Look on my works, ye Mighty, and despair!")
-                agent.speak(tmr, join=True)
+                user.speak(tmr, join=True)
                 action = True
 
     # The agent, after the mission loads, will observe every 1 second.  When he finds a chat signal,
