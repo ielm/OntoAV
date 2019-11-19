@@ -2,7 +2,7 @@
 <Mission xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <About>
-        <Summary>OntoAgent playground.</Summary>
+        <Summary>MultiAgent Playground</Summary>
     </About>
 
     <ServerSection>
@@ -13,7 +13,7 @@
         </ServerInitialConditions>
         <ServerHandlers>
             <!-- change path to abs path of /OntoAV/worldtest/resources/25world-->
-            <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/tests/resources/new25world" forceReset="true" />
+            <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/worldtest/resources/new25world" forceReset="true" />
         </ServerHandlers>
     </ServerSection>
 
