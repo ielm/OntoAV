@@ -58,7 +58,7 @@ def follow_command():
 		elif (s == "back up"):
 			if (facing == PositionXMR.Facing.SOUTH):
 				# the next block to walk on
-				raod = agent.environment().relative_block(agent, 0, -1, -1).type()
+				road = agent.environment().relative_block(agent, 0, -1, -1).type()
 				# whether is the front road is blocked
 				clear_road = (agent.environment().relative_block(agent, 0, 0, -1).type() == "")
 			elif (facing == PositionXMR.Facing.WEST):
@@ -93,8 +93,9 @@ if __name__ == '__main__':
 	# Observe location and surroundings
 	agent.observe(join=True)
 
-	# Say something
-	tmr = SpeechTMR.build("Hello world.")
+	# After the user communicates to the agent that they want to visit the pharmacy, the agent
+	# communicates to the user the decision that was made before planning a new route.
+	tmr = SpeechTMR.build("OK, I will go to the pharmacy, and then go to the grocery store.")
 	agent.speak(tmr, join=True)
 
 	follow_command()
