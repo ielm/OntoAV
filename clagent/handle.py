@@ -15,13 +15,15 @@ class CommandHandleExecutable(HandleExecutable):
     def run(self, agent: CLAgent, signal: ChatTMR):
         text = signal.raw_text()
         path = None
+        tmr = None
         if self.is_pretentious(text):
             tmr = SpeechTMR.build("Nothing beside remains. Round the decay Of that colossal wreck, boundless and bare The lone and level sands stretch far away.")
-        elif self.is_command(text):
-            path, tmr = self.parse_command(text)
+        elif True in list(map(lambda c: c in text.lower(), ["move", "walk", "turn", "go"])):
+            self.parse_command(agent, text)
         else:
             tmr = SpeechTMR.build("I heard %s say '%s'." % (signal.agent().id, text))
-        agent.speak(tmr, join=True)
+        if tmr is not None:
+            agent.speak(tmr, join=True)
         if path is not None:
             agent.movepath(path)
 
@@ -33,40 +35,36 @@ class CommandHandleExecutable(HandleExecutable):
             return False
 
     @staticmethod
-    def is_command(signal: str) -> bool:
-        if True in list(map(lambda c: c in signal.lower(), ["move", "walk", "turn", "go"])):
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def parse_command(signal: str):
+    def parse_command(agent: CLAgent, signal: str):
         command = signal.lower()
 
         def _get_digits(text):
             return ''.join(filter(lambda x: x.isdigit(), text))
 
-        if "move" in command:
+        if True in list(map(lambda c: c in command, ["move", "walk", "go"])):
             if "forward" in command:
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "fx" + digit
-                return path, SpeechTMR.build("Moving forward %s step(s)" % digit)
+                agent.speak(SpeechTMR.build("Moving forward {} step{}".format(digit, "s" if int(digit) > 1 else "")))
+                agent.movepath(path)
             if "backward" in command:
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "bx" + digit
-                return path, SpeechTMR.build("Moving backward %s step(s)" % digit)
+                agent.speak(SpeechTMR.build("Moving backward {} step{}".format(digit, "s" if int(digit) > 1 else "")))
+                agent.movepath(path)
 
-        if "turn" in command:
+        if True in list(map(lambda c: c in command, ["turn", "look"])):
             if True in list(map(lambda c: c in command, ["right", "clockwise", "cw"])):
                 digit = _get_digits(command)
-
                 digit = "1" if digit == "" else digit
                 path = "cwx" + digit
-                return path, SpeechTMR.build("Turning clockwise %s step(s)" % digit)
+                agent.speak(SpeechTMR.build("Turning clockwise {} step{}".format(digit, "s" if int(digit) > 1 else "")))
+                agent.movepath(path)
             if True in list(map(lambda c: c in command, ["left", "counterclockwise", "ccw"])):
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "ccwx" + digit
-                return path, SpeechTMR.build("Turning counter-clockwise %s step(s)" % digit)
+                agent.speak(SpeechTMR.build("Turning counter-clockwise {} step{}".format(digit, "s" if int(digit) > 1 else "")))
+                agent.movepath(path)
