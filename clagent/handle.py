@@ -26,6 +26,9 @@ class CommandHandleExecutable(HandleExecutable):
     def parse_command(agent: CLAgent, signal: str):
         command = signal.lower()
 
+        tmr = None
+        path = None
+
         def _get_digits(text):
             return ''.join(filter(lambda x: x.isdigit(), text))
 
@@ -34,25 +37,25 @@ class CommandHandleExecutable(HandleExecutable):
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "fx" + digit
-                agent.speak(SpeechTMR.build("Moving forward {} step{}".format(digit, "s" if int(digit) > 1 else "")))
-                agent.movepath(path)
+                tmr = SpeechTMR.build("Moving forward {} step{}".format(digit, "s" if int(digit) > 1 else ""))
             if "backward" in command:
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "bx" + digit
-                agent.speak(SpeechTMR.build("Moving backward {} step{}".format(digit, "s" if int(digit) > 1 else "")))
-                agent.movepath(path)
+                tmr = SpeechTMR.build("Moving backward {} step{}".format(digit, "s" if int(digit) > 1 else ""))
 
         if True in list(map(lambda c: c in command, ["turn", "look"])):
             if True in list(map(lambda c: c in command, ["right", "clockwise", "cw"])):
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "cwx" + digit
-                agent.speak(SpeechTMR.build("Turning clockwise {} step{}".format(digit, "s" if int(digit) > 1 else "")))
-                agent.movepath(path)
+                tmr = SpeechTMR.build("Turning clockwise {} step{}".format(digit, "s" if int(digit) > 1 else ""))
             if True in list(map(lambda c: c in command, ["left", "counterclockwise", "ccw"])):
                 digit = _get_digits(command)
                 digit = "1" if digit == "" else digit
                 path = "ccwx" + digit
-                agent.speak(SpeechTMR.build("Turning counter-clockwise {} step{}".format(digit, "s" if int(digit) > 1 else "")))
-                agent.movepath(path)
+                tmr = SpeechTMR.build("Turning counter-clockwise {} step{}".format(digit, "s" if int(digit) > 1 else ""))
+        if tmr is not None:
+            agent.speak(tmr)
+        if path is not None:
+            agent.movepath(path)
