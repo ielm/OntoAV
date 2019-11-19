@@ -18,7 +18,7 @@
     </ServerSection>
 
     <AgentSection mode="Survival">
-        <Name>Sasha</Name>
+        <Name>User</Name>
         <AgentStart>
             <Placement x="-541.5" y="4" z="370.5" pitch="5" yaw="0"/>
             <!--
@@ -47,7 +47,7 @@
     </AgentSection>
 
     <AgentSection mode="Survival">
-        <Name>Jake</Name>
+        <Name>Agent</Name>
         <AgentStart>
             <Placement x="-541.5" y="4" z="376.5" pitch="5" yaw="0"/>
             <!--
