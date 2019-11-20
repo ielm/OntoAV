@@ -5,6 +5,7 @@ from ontocraft.effectors.speech import SpeechTMR
 from ontocraft.observers.chat import ChatTMR
 from ontocraft.utils.MalmoUtils import bootstrap_specific
 from ontograph.Frame import Frame
+from ontocraft.observers.position import PositionXMR
 
 from clagent.agent import CLAgent
 from clagent.handle import ChatHandleExecutable
@@ -20,9 +21,9 @@ if __name__ == '__main__':
 
     # Sasha, after the mission loads, will say "Hello world." one time.
     def bootstrap_sasha():
-        agent_host = bootstrap_specific(("resources", "25world.xml"), clients, 0)
+        agent_host = bootstrap_specific(("tests.resources", "25world.xml"), clients, 0)
 
-        agent = CLAgent.build(agent_host)
+        agent = CLAgent.build(agent_host,None)
 
         action = False
         while agent.host().getWorldState().is_mission_running:
@@ -37,9 +38,9 @@ if __name__ == '__main__':
     # Jake, after the mission loads, will observer every 2 seconds.  When he finds a chat signal,
     # it will be analyzed and executed with the RespondToChatExecutable above (basically just printing a log).
     def bootstrap_jake():
-        agent_host = bootstrap_specific(("resources", "25world.xml"), clients, 1)
+        agent_host = bootstrap_specific(("tests.resources", "25world.xml"), clients, 1)
 
-        agent = CLAgent.build(agent_host)
+        agent = CLAgent.build(agent_host,None)
 
         # Jake needs to know who Sasha is, so the input signal can be attributed to the speaker correctly.
         sasha = Frame("@ENV.AGENT.?").add_parent("@ONT.AGENT")
@@ -48,8 +49,8 @@ if __name__ == '__main__':
         # Disable all of the other signal observations for optimization of this example.
         from ontocraft.observers.position import PositionSignal
         from ontocraft.observers.vision import SupervisionSignal
-        agent.disable_observer(PositionSignal)
-        agent.disable_observer(SupervisionSignal)
+        # agent.disable_observer(PositionSignal)
+        # agent.disable_observer(SupervisionSignal)
 
         # Make sure Jake knows how to respond to an analyzed speech act.
         agent.add_response(Frame("@ONT.SPEECH-ACT"), ChatHandleExecutable)
