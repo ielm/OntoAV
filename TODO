@@ -1,7 +1,15 @@
 TODO:
-    [] - Build test environment for agent
-    [] - Instantiate agent in world
-    [] - Build AMR for agent to move x steps forward
-    [] - Build AMR for agent to turn x times cw & ccw
-    [] - Implement route planning algorithm
+    [x] - Build test environment for agent
+    [x] - Instantiate agent in world
+    [x] - Build AMR for agent to move x steps forward
+    [x] - Build AMR for agent to turn x times cw & ccw
+    [x] - Implement route planning algorithm [Hayes]
+    [] - Show tmrs, vmrs, and amrs involved in a demo
+    [] - Show case where human input can be used to turn or move upon barrier
+    [] - Integrate generator into agent system
     [] -
+
+
+Notes:
+    - Ability to process turning is a plan for deciding what to do in cases of ambiguity
+    -

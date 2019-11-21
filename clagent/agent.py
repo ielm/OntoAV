@@ -3,7 +3,6 @@ from ontocraft.effectors.move import MoveAMR
 from ontocraft.effectors.speech import SpeechTMR
 from ontocraft.observers.position import PositionXMR
 from ontocraft.utils.MalmoUtils import OntoCraftAgentHost, bootstrap
-from clagent.handle import ChatHandleExecutable
 from operator import sub
 from pkgutil import get_data
 from typing import List, Tuple
@@ -23,9 +22,10 @@ DELTA_TO_CARDINAL = {
     (0, -1): PositionXMR.Facing.EAST,
 }
 
+
 class CLAgent(MalmoAgent):
     @classmethod
-    def build(cls, host: OntoCraftAgentHost, map_file: Tuple[str, str]) -> 'CLAgent':
+    def build(cls, host: OntoCraftAgentHost, map_file: Tuple[str, str] = None) -> 'CLAgent':
         agent = super().build(host)
         agent = CLAgent(agent.anchor)
         
@@ -37,11 +37,6 @@ class CLAgent(MalmoAgent):
             agent.town_map[agent.map_loc] = ord('R')
         
         return agent
-
-        # TODO:
-        #   [] - Do something with effectors
-        #   [] - Build utilities for building movement AMRs paths automatically
-        #   [] - Build utilities for moving, observing, and generating output (speech and movement)
 
     def _get_coord(self, char: str) -> Tuple[int, int]:
         return next(coord for coord, c in self.town_map.items() if c == ord(char))
@@ -100,8 +95,6 @@ class CLAgent(MalmoAgent):
                     amr.add_to_path_move_forward()
                     self.map_loc = next_loc
                 self.move(amr, join=True)
-
-
 
     def speaksentence(self, string: str):
         tmr = SpeechTMR.build(string)
@@ -171,7 +164,6 @@ if __name__ == '__main__':
     time.sleep(0.5)
 
     agent = CLAgent.build(host)
-    agent.add_response("@ONT.SPEECH-ACT", ChatHandleExecutable)
 
     planned_path = "cwx1, fx1, ccwx1, fx5, cwx1"
     agent.movepath(planned_path)

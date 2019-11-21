@@ -2,7 +2,7 @@
 <Mission xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <About>
-        <Summary>OntoAgent playground.</Summary>
+        <Summary>MultiAgent Playground</Summary>
     </About>
 
     <ServerSection>
@@ -13,14 +13,43 @@
         </ServerInitialConditions>
         <ServerHandlers>
             <!-- change path to abs path of /OntoAV/worldtest/resources/25world-->
-            <!-- <FileWorldGenerator src="/Users/XiaoyiLiu/Dropbox/96_LEIA/CL/OntoAV/worldtest/resources/25world" forceReset="true" /> -->
-            <FileWorldGenerator src="/media/tangc/Storage/RPI/Fall 2019/LEIA/OntoAV/worldtest/resources/prettyworld" forceReset="true" />
-
+            <!-- <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/worldtest/resources/new25world" forceReset="true" /> -->
+            <FileWorldGenerator src="/Users/XiaoyiLiu/Dropbox/96_LEIA/CL/OntoAV/worldtest/resources/new25world" forceReset="true" />
+            
         </ServerHandlers>
     </ServerSection>
 
     <AgentSection mode="Survival">
-        <Name>Sasha</Name>
+        <Name>User</Name>
+        <AgentStart>
+            <Placement x="-541.5" y="4" z="370.5" pitch="5" yaw="0"/>
+            <!--
+                Note:   North is Z-, South is Z+
+                        West is X-, East is X+
+                        Down is Y-, Up is Y+
+            -->
+            <Inventory>
+                <InventoryItem slot="0" type="diamond_pickaxe"/>
+            </Inventory>
+        </AgentStart>
+        <AgentHandlers>
+            <DiscreteMovementCommands/>
+            <InventoryCommands/>
+            <ChatCommands/>
+            <ObservationFromFullStats/>
+            <ObservationFromGrid>
+                <Grid name="supervision">
+                    <min x="-2" y="-2" z="-2" />
+                    <max x="2" y="2" z="2" />
+                </Grid>
+            </ObservationFromGrid>
+            <ObservationFromChat/>
+            <ObservationFromRay/>
+        </AgentHandlers>
+    </AgentSection>
+
+    <AgentSection mode="Survival">
+        <Name>Agent</Name>
         <AgentStart>
             <Placement x="-541.5" y="4" z="376.5" pitch="5" yaw="0"/>
             <!--
