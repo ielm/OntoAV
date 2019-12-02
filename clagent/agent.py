@@ -1,8 +1,12 @@
+from ontoagent.engine.executable import HandleExecutable
+from ontoagent.engine.signal import Signal
 from ontocraft.agent import MalmoAgent
 from ontocraft.effectors.move import MoveAMR
 from ontocraft.effectors.speech import SpeechTMR
 from ontocraft.observers.position import PositionXMR
 from ontocraft.utils.MalmoUtils import OntoCraftAgentHost, bootstrap
+from ontograph.Frame import Frame
+from ontocraft.observers.chat import ChatTMR
 from operator import sub
 from pkgutil import get_data
 from typing import List, Tuple
@@ -30,11 +34,15 @@ class CLAgent(MalmoAgent):
         agent = CLAgent(agent.anchor)
         
         if map_file is not None:
+            agent.add_response(Frame("@ONT.SPEECH-ACT"), DialogueHandleExecutable)
+            
             map_array = get_data(*map_file).split(b'\n')
             agent.town_map = {(ix, iy): c for ix, row in enumerate(map_array)
                                           for iy, c in enumerate(row)}
             agent.map_loc = agent._get_coord('A')
             agent.town_map[agent.map_loc] = ord('R')
+            agent.destination = None
+            agent.is_navigating = False
         
         return agent
 
@@ -45,7 +53,7 @@ class CLAgent(MalmoAgent):
         queue = [(self.map_loc, [self.map_loc])]
         while len(queue):
             (loc, path) = queue.pop(0)
-            for delta in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            for delta in [(-1, 0), (0, 1), (0, -1), (1, 0)]:
                 next_loc = tuple(map(sum, zip(loc, delta)))
                 if next_loc not in self.town_map:
                     continue
@@ -55,24 +63,42 @@ class CLAgent(MalmoAgent):
                     queue.append((next_loc, path + [next_loc]))
         return None
 
-    def navigate_to(self, char: str):
+    def set_destination(self, char: str):
         if self.town_map is None:
             raise
-        destination = self._get_coord(char)
+        self.destination = self._get_coord(char)
+        if not self.is_navigating:
+            self.navigate()
+
+    def preempt_destination(self, char: str):
+        if self.town_map is None:
+            raise
+        old_destination = self.destination
+        self.destination = self._get_coord(char)
+        self.navigate()
+        self.destination = old_destination
+        self.navigate()
+
+
+    def navigate(self):
+        self.is_navigating = True
         # keep trying till we get there
         success = False
         while not success:
-            path = self._find_path(destination)
+            path = self._find_path(self.destination)
             success = True
 
             for next_loc in path[1:]:
                 self.observe(join=True)
+                if self.destination != path[-1]:
+                    success = False
+                    break
                 target_delta = tuple(a - b for a, b in zip(next_loc, self.map_loc))
                 
                 # check if path is blocked
                 block = self.environment().relative_block(self, -target_delta[1], 0, -target_delta[0]).type()
                 # if it is, mark that on the map and try again
-                if block and next_loc != destination:
+                if block and next_loc != self.destination:
                     print(block)
                     self.town_map[next_loc] = ord('X')
                     self.speaksentence('Recalculating.')
@@ -91,10 +117,11 @@ class CLAgent(MalmoAgent):
                     amr.add_to_path_turn_clockwise()
                 if dir_delta == 3:
                     amr.add_to_path_turn_counterclockwise()
-                if next_loc != destination:
+                if next_loc != self.destination:
                     amr.add_to_path_move_forward()
                     self.map_loc = next_loc
                 self.move(amr, join=True)
+        self.is_navigating = False
 
     def speaksentence(self, string: str):
         tmr = SpeechTMR.build(string)
@@ -157,6 +184,23 @@ class CLAgent(MalmoAgent):
             mvmt = list(map(lambda x: int(x) if x.isdigit() else x, mvmt.split("x")))
             self._move(mvmt, debug=debug)
 
+
+class DialogueHandleExecutable(HandleExecutable):
+    def validate(self, agent: CLAgent, signal: Signal) -> bool:
+        return (
+            signal.root() ^ Frame("@ONT.SPEECH-ACT") and 
+            signal.root()["THEME"].singleton() ^ Frame("@ONT.RAW-TEXT") #and 
+            # signal.agent().id == "@ENV.AGENT.1"
+        )
+
+    def run(self, agent: CLAgent, signal: ChatTMR):
+        text = signal.raw_text()
+        print(text)
+        if text == "Go to the grocery store.":
+            agent.set_destination("G")
+        elif text == "Actually, go to the pharmacy first.":
+            agent.speaksentence("Ok, we'll go to the pharmacy, then the grocery store.")
+            agent.preempt_destination("P")
 
 if __name__ == '__main__':
     host = bootstrap(("resources", "world.xml"))

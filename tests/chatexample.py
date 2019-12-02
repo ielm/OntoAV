@@ -5,6 +5,7 @@ from ontocraft.effectors.speech import SpeechTMR
 from ontocraft.observers.chat import ChatTMR
 from ontocraft.utils.MalmoUtils import bootstrap_specific
 from ontograph.Frame import Frame
+from ontocraft.observers.position import PositionXMR
 
 from clagent.agent import CLAgent
 from clagent.handle import CommandHandleExecutable
@@ -20,7 +21,11 @@ if __name__ == '__main__':
     def bootstrap_user():
         agent_host = bootstrap_specific(("worldtest.resources", "multiworld.xml"), clients, 0)
 
-        user = CLAgent.build(agent_host)
+    # Sasha, after the mission loads, will say "Hello world." one time.
+    def bootstrap_sasha():
+        agent_host = bootstrap_specific(("tests.resources", "25world.xml"), clients, 0)
+
+        agent = CLAgent.build(agent_host,None)
 
         action = False
         time.sleep(1)
@@ -39,13 +44,19 @@ if __name__ == '__main__':
     def bootstrap_agent():
         agent_host = bootstrap_specific(("worldtest.resources", "multiworld.xml"), clients, 1)
 
-        agent = CLAgent.build(agent_host)
+        agent = CLAgent.build(agent_host,None)
 
         # The agent needs to know who the User is, so the input signal can be attributed to the speaker correctly.
         user = Frame("@ENV.AGENT.?").add_parent("@ONT.AGENT")
         user["HAS-NAME"] = "User"
 
-        # Make sure the agent knows how to respond to an analyzed speech act.
+        # Disable all of the other signal observations for optimization of this example.
+        from ontocraft.observers.position import PositionSignal
+        from ontocraft.observers.vision import SupervisionSignal
+        # agent.disable_observer(PositionSignal)
+        # agent.disable_observer(SupervisionSignal)
+
+        # Make sure Jake knows how to respond to an analyzed speech act.
         agent.add_response(Frame("@ONT.SPEECH-ACT"), CommandHandleExecutable)
 
         while agent.host().getWorldState().is_mission_running:
