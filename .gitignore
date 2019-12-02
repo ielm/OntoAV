@@ -6,3 +6,10 @@
 dist*
 OntoCraft.egg-info*
 build*
+bin
+lib
+lib64
+pyvenv.cfg
+share
+*.sh
+xrandr
