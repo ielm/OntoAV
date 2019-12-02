@@ -18,6 +18,7 @@ if __name__ == '__main__':
 	# Build a new agent
 	agent = CLAgent.build(host, ("worldtest.resources", "map.txt"))
 	agent.navigate_to('G')
+	# agent.navigate_to('P')
 
 	# agent.movepath("fx18, cwx1, fx12, cwx1")
 
