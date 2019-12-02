@@ -126,8 +126,8 @@ class MalmoAgent(Agent):
 
     # Custom input overrides
 
-    def observe(self, join: bool=False):
-        MalmoMasterObserver().observe(self, join=join)
+    def observe(self, join: bool=False, chat_debug: bool = False):
+        MalmoMasterObserver().observe(self, join=join, chat_debug=chat_debug)
 
     def enable_observer(self, signal_type: Type[Signal], observation_fields: Set[str], cache_key: str, latest_only: bool=True):
         MalmoMasterObserver().enable_observer(signal_type, observation_fields, cache_key, latest_only=latest_only)

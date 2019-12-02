@@ -13,7 +13,7 @@
         </ServerInitialConditions>
         <ServerHandlers>
             <!-- change path to abs path of /OntoAV/worldtest/resources/25world-->
-            <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/worldtest/resources/new25world" forceReset="true" />
+            <FileWorldGenerator src="/Users/Ivan/Dropbox/Code/LEIA/OntoAgent/OntoAV/worldtest/resources/prettyworld" forceReset="true" />
         </ServerHandlers>
     </ServerSection>
 

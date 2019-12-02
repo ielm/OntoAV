@@ -74,7 +74,7 @@ class MalmoMasterObserver(object):
                 observer.disable()
                 return
 
-    def observe(self, agent: 'MalmoAgent', join: bool=False):
+    def observe(self, agent: 'MalmoAgent', join: bool=False, chat_debug: bool = False):
         host = agent.host()
         world_state = host.getWorldState()
 
@@ -82,6 +82,12 @@ class MalmoMasterObserver(object):
         observations = list(world_state.observations)
 
         for i, observation in enumerate(observations):
+            # print(json.loads(observation.text))
+            if chat_debug:
+                obs = json.loads(observation.text)
+                if "Chat" in obs.keys():
+                    print(obs["Chat"])
+                    # print()
             timestamp = int(observation.timestamp.timestamp() * 1000)
             if "LAST-OBSERVATION" not in cache or cache["LAST-OBSERVATION"].singleton() < timestamp:
                 cache["LAST-OBSERVATION"] = timestamp

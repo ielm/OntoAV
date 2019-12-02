@@ -23,13 +23,15 @@ if __name__ == '__main__':
         user = CLAgent.build(agent_host)
 
         action = False
+        time.sleep(1)
         while user.host().getWorldState().is_mission_running:
-            time.sleep(2)
+            time.sleep(1)
 
             if not action:
                 tmr = SpeechTMR.build("My name is Ozymandias, king of agents: Look on my works, ye Mighty, and despair!")
                 user.speak(tmr, join=True)
                 action = True
+            user.observe(join=True)
 
     # The agent, after the mission loads, will observe every 1 second.  When he finds a chat signal,
     # it will be analyzed and execute a chat handler which checks for movement commands. On
@@ -48,7 +50,7 @@ if __name__ == '__main__':
 
         while agent.host().getWorldState().is_mission_running:
             time.sleep(1)
-            agent.observe(join=True)
+            agent.observe(join=True, chat_debug=True)
 
     # Make a process for bootstrapping and running each agent; they do not need to be joined or timed otherwise.
     from multiprocessing import Process
